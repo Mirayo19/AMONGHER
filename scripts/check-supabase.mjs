@@ -33,8 +33,8 @@ if (!url || !anon || url.includes('YOUR-PROJECT')) {
   console.error('✘ VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY are not set (create .env.local from .env.example).');
   process.exit(2);
 }
-if (/service_role/i.test(anon) || (() => { try { return JSON.parse(Buffer.from(anon.split('.')[1], 'base64').toString()).role === 'service_role'; } catch { return false; } })()) {
-  console.error('✘ STOP: that looks like the service_role key. Never put it in .env.local or anywhere in the app. Use the anon (public) key.');
+if (anon.startsWith('sb_secret_') || /service_role/i.test(anon) || (() => { try { return JSON.parse(Buffer.from(anon.split('.')[1], 'base64').toString()).role === 'service_role'; } catch { return false; } })()) {
+  console.error('✘ STOP: that looks like a SECRET key (service_role or sb_secret_…). Never put it in .env.local or anywhere in the app. Use the anon (public) key.');
   process.exit(2);
 }
 
