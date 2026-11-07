@@ -21,8 +21,8 @@ function RingsArt() {
 
 const PILLARS = [
   { icon: MessagesSquare, title: 'A community that listens', text: 'Share an experience, ask what you’re afraid to ask, and hear from women who’ve been there. Respond with “Felt this”, not likes.' },
-  { icon: BookOpen, title: 'A library of lived knowledge', text: 'Editors gather consented, reviewed experiences into collections — like “Things I wish I knew before motherhood”.' },
-  { icon: HeartHandshake, title: 'Find someone who understands', text: 'Tell us what you’re facing and meet women who’ve opted in to share similar experiences. Request a private chat — she decides.' },
+  { icon: BookOpen, title: 'A library of lived knowledge', text: 'Editors gather consented, reviewed experiences into collections, like “Things I wish I knew before motherhood”.' },
+  { icon: HeartHandshake, title: 'Find someone who understands', text: 'Tell us what you’re facing and meet women who’ve opted in to share similar experiences. Request a private chat. She decides.' },
   { icon: Lock, title: 'Private by design', text: 'No real names or photos. Message requests you can decline. Block and report in one tap.' },
 ];
 
@@ -36,7 +36,7 @@ export default function Landing() {
         <BrandLink />
         <nav className="flex items-center gap-1.5">
           <Link to="/safety" className="btn-quiet btn-sm hidden sm:inline-flex">Safety</Link>
-          {me ? <Link to="/home" className="btn-primary btn-sm">Open app</Link> : <><Link to="/login" className="btn-quiet btn-sm">Sign in</Link><Link to="/signup" className="btn-primary btn-sm">Join</Link></>}
+          {me ? <Link to="/home" className="btn-primary btn-sm">Open app</Link> : <><Link to="/login" className="btn-quiet btn-sm">Login</Link><Link to="/signup" className="btn-primary btn-sm">Sign up</Link></>}
         </nav>
       </header>
 
@@ -47,13 +47,13 @@ export default function Landing() {
             Learn from <em className="font-display italic text-plum-600">her.</em><br />Share with <em className="font-display italic text-plum-600">her.</em><br />Grow together.
           </h1>
           <p className="mt-6 max-w-md text-[17px] leading-relaxed text-ink-muted">
-            AMONGHER is an anonymous-first space where women trade real-life experience — about health, work, money, motherhood, safety and everything in between.
+            AMONGHER is an anonymous-first space where women trade real-life experience about health, work, money, motherhood, safety and everything in between.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to={me ? '/home' : '/signup'} className="btn-primary btn-lg">{me ? 'Go to your feed' : 'Create your anonymous profile'}<ArrowRight size={18} /></Link>
-            {!me && <Link to="/login" className="btn-secondary btn-lg">Sign in</Link>}
+            {!me && <Link to="/login" className="btn-secondary btn-lg">Login</Link>}
           </div>
-          <p className="mt-4 text-xs text-ink-muted">No real name. No photo. Age is self-declared — see how we think about <Link to="/safety" className="font-semibold text-plum-700 underline">safety</Link>.</p>
+          <p className="mt-4 text-xs text-ink-muted">No real name. No photo. Age is self-declared. See how we think about <Link to="/safety" className="font-semibold text-plum-700 underline">safety</Link>.</p>
         </div>
         <div className="relative"><RingsArt /></div>
       </section>
