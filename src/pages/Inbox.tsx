@@ -151,7 +151,7 @@ export function Conversation() {
 
       <p className="mx-auto mb-4 flex max-w-xs items-center justify-center gap-1.5 text-center text-[11.5px] leading-snug text-ink-muted"><Lock size={12} className="shrink-0" />Private between you two. Not end-to-end encrypted.</p>
       <div className="flex-1 space-y-1.5 pb-4" aria-live="polite">
-        {msgs === null ? <SkeletonCards n={2} /> : msgs.length === 0 && <p className="py-10 text-center text-sm text-ink-muted">Say hello. She accepted your request, so she’d like to hear from you.</p>}
+        {msgs === null ? <SkeletonCards n={2} /> : msgs.length === 0 && <p className="py-10 text-center text-sm text-ink-muted">Say hello and start the conversation.</p>}
         {msgs?.map((m, i) => {
           const mine = m.sender_id === me; const prev = msgs[i - 1];
           const newGroup = !prev || prev.sender_id !== m.sender_id || +new Date(m.created_at) - +new Date(prev.created_at) > 5 * 60_000;
