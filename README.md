@@ -29,6 +29,13 @@ With no Supabase variables the app starts in **clearly-labelled preview mode** (
 
 The same steps are shown in-app at `/setup`.
 
+### Verify the connection
+```bash
+npm run check:supabase                                   # anonymous lock-down checks
+CHECK_EMAIL=you@example.com CHECK_PASSWORD=… npm run check:supabase   # + signed-in checks
+```
+The second form (sign up a test member in the app and confirm her email first) exercises the sign-up trigger, seed data, post create/read/delete, search, RPCs, the private storage bucket and realtime. It uses only the public anon key and removes what it creates.
+
 ## Security model
 
 All authorisation is enforced in PostgreSQL; the React app only hides UI.
