@@ -31,6 +31,7 @@ export function useTaxonomy() {
     situations: (tax?.situations ?? []).filter((s) => s.is_active),
     allSituations: tax?.situations ?? [],
     wishTopics: (tax?.wishTopics ?? []).filter((w) => w.is_active),
+    allWishTopics: tax?.wishTopics ?? [],
     cat: (id?: string | null) => categories.find((c) => c.id === id) ?? null,
     situation: (id?: string | null) => (tax?.situations ?? []).find((s) => s.id === id) ?? null,
     wishLabel: (slug?: string | null) => (tax?.wishTopics ?? []).find((w) => w.slug === slug)?.label ?? slug ?? '',

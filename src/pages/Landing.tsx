@@ -85,7 +85,7 @@ export default function Landing() {
       <footer className="border-t border-ivory-300/70 px-5 py-10 text-center text-sm text-ink-muted">
         <div className="mx-auto mb-3 flex w-fit items-center gap-2"><LogoMark size={22} /><span className="font-display text-xs font-semibold uppercase tracking-[0.2em] text-plum-900">Among<span className="text-brass-500">her</span></span></div>
         <p>Learn from her. Share with her. Grow together.</p>
-        <p className="mt-3 flex justify-center gap-5"><Link to="/safety" className="hover:underline">Safety centre</Link><Link to="/safety#guidelines" className="hover:underline">Guidelines</Link><Link to="/setup" className="hover:underline">Setup</Link></p>
+        <p className="mt-3 flex justify-center gap-5"><Link to="/safety" className="hover:underline">Safety centre</Link><Link to="/safety#guidelines" className="hover:underline">Guidelines</Link><Link to="/privacy" className="hover:underline">Privacy</Link><Link to="/terms" className="hover:underline">Terms</Link><Link to="/setup" className="hover:underline">Setup</Link></p>
       </footer>
     </div>
   );

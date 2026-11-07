@@ -28,6 +28,11 @@ export function createSupabaseApi(): Api {
   };
   const ignoreDuplicate = (error: Any) => { if (error && error.code !== '23505') throw toAppError(error); };
   const rpc = async <T = void>(fn: string, args?: Record<string, unknown>) => check(await sb.rpc(fn, args)) as T;
+  /** Prefix-matching full-text query ("pens" finds "pension"). Returns null when nothing searchable remains. */
+  const prefixQuery = (raw: string) => {
+    const terms = raw.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter((t) => t.length > 0).slice(0, 8);
+    return terms.length ? terms.map((t) => `${t}:*`).join(' & ') : null;
+  };
   const namesFor = async (ids: (string | null)[]) => {
     const list = [...new Set(ids.filter(Boolean))] as string[];
     if (!list.length) return new Map<string, string>();
@@ -72,6 +77,7 @@ export function createSupabaseApi(): Api {
     },
     async usernameAvailable(username) { return (await rpc<boolean>('username_available', { p_username: username })) === true; },
     async deleteAccount() { await rpc('delete_my_account'); await sb.auth.signOut(); },
+    async exportMyData() { return await rpc<Record<string, unknown>>('export_my_data'); },
 
     // ---------------------------------------------------------------- me
     async getMe() {
@@ -127,7 +133,9 @@ export function createSupabaseApi(): Api {
       if (q.authorId) query = query.eq('author_id', q.authorId);
       if (q.bookmarked) query = query.eq('bookmarked', true);
       if (q.allowCurationOnly) query = query.eq('allow_curation', true);
-      if (q.search?.trim()) query = query.textSearch('fts', q.search.trim(), { type: 'websearch', config: 'simple' });
+      if (q.ids) query = query.in('id', q.ids.length ? q.ids : ['00000000-0000-0000-0000-000000000000']);
+      const fts = q.search ? prefixQuery(q.search) : null;
+      if (fts) query = query.textSearch('fts', fts, { config: 'simple' });
       query = q.filter === 'popular'
         ? query.order('popularity', { ascending: false }).order('created_at', { ascending: false })
         : query.order('created_at', { ascending: false });
@@ -141,6 +149,7 @@ export function createSupabaseApi(): Api {
       return row.id as string;
     },
     async deletePost(id) { check(await sb.from('posts').delete().eq('id', id)); },
+    async editPost(id, title, body) { await rpc('edit_post', { p_post: id, p_title: title, p_body: body }); },
     async setCurationConsent(postId, allow) { await rpc('set_post_curation_consent', { p_post: postId, p_allow: allow }); },
     async setReaction(postId, type) {
       const user_id = await uidOrThrow();
@@ -195,7 +204,8 @@ export function createSupabaseApi(): Api {
       if (q.collectionId) query = query.eq('collection_id', q.collectionId);
       if (q.categoryId) query = query.eq('category_id', q.categoryId);
       if (q.itemType) query = query.eq('item_type', q.itemType);
-      if (q.search?.trim()) query = query.textSearch('fts', q.search.trim(), { type: 'websearch', config: 'simple' });
+      const fts = q.search ? prefixQuery(q.search) : null;
+      if (fts) query = query.textSearch('fts', fts, { config: 'simple' });
       return check(await query.order('reviewed_at', { ascending: false }).limit(q.limit ?? 50)) as LibraryEntry[];
     },
     async setCollectionSaved(id, on) {
@@ -286,6 +296,10 @@ export function createSupabaseApi(): Api {
       return check(await q) as Comment[];
     },
     async staffGetComment(id) { return check(await sb.from('comment_feed').select('*').eq('id', id).maybeSingle()) as Comment | null; },
+    async staffReviewQueue() {
+      const ids = (await rpc<string[]>('staff_review_queue')) ?? [];
+      return ids.length ? await this.listPosts({ ids, status: 'any', limit: 100 }) : [];
+    },
     async staffGetMemberById(id) { return check(await sb.from('public_profiles').select('*').eq('id', id).maybeSingle()) as Member | null; },
     async staffListLog() { return check(await sb.from('moderation_log').select('*').order('created_at', { ascending: false }).limit(150)) as LogEntry[]; },
 
@@ -315,6 +329,7 @@ export function createSupabaseApi(): Api {
       return data?.signedUrl ?? null;
     },
     async adminSaveCategory(c) { check(await sb.from('categories').upsert(c)); },
+    async adminSaveWishTopic(w) { check(await sb.from('wish_topics').upsert(w)); },
     async adminSaveSituation(s) { check(await sb.from('situations').upsert(s)); },
     async adminSaveCollection(id, c) {
       if (id) check(await sb.from('collections').update(c).eq('id', id));

@@ -89,8 +89,8 @@ function TargetPreview({ r }: { r: Report }) {
   if ('post' in d) return d.post ? <div className="rounded-xl bg-plum-50/70 p-3.5 text-sm"><p className="font-semibold">{d.post.title}</p><p className="prose-body mt-1 line-clamp-6 text-[13.5px]">{d.post.body}</p><p className="mt-2 text-xs text-ink-muted">Status: <b>{d.post.status}</b> · by {d.post.author_username ? `@${d.post.author_username}` : 'unknown'}{d.post.is_anonymous && ' (anonymous to members)'}</p></div> : <p className="text-sm text-ink-muted">Post no longer exists.</p>;
   if ('comment' in d) return d.comment ? <div className="rounded-xl bg-plum-50/70 p-3.5 text-sm"><p className="prose-body text-[13.5px]">{d.comment.body}</p><p className="mt-2 text-xs text-ink-muted">Status: <b>{d.comment.status}</b> · by {d.comment.author_username ? `@${d.comment.author_username}` : 'unknown'}</p></div> : <p className="text-sm text-ink-muted">Comment no longer exists.</p>;
   if ('member' in d) return d.member ? <p className="rounded-xl bg-plum-50/70 p-3.5 text-sm">Member <b>@{d.member.username}</b>{d.member.bio && <> — {d.member.bio}</>}</p> : <p className="text-sm text-ink-muted">Member no longer exists.</p>;
-  const ev = (r.evidence as { from_reporter: boolean; body: string; at: string }[] | null) ?? [];
-  return <div className="space-y-1 rounded-xl bg-plum-50/70 p-3.5 text-[13px]"><p className="mb-1 text-xs font-bold uppercase tracking-wide text-ink-muted">Messages attached by the reporter</p>{ev.length ? ev.map((m, i) => <p key={i}><b>{m.from_reporter ? 'Reporter' : 'Reported'}:</b> {m.body}</p>) : <p className="text-ink-muted">No messages.</p>}</div>;
+  const ev = (r.evidence as { from_reporter: boolean; body: string; at: string; reported?: boolean }[] | null) ?? [];
+  return <div className="space-y-1 rounded-xl bg-plum-50/70 p-3.5 text-[13px]"><p className="mb-1 text-xs font-bold uppercase tracking-wide text-ink-muted">{r.target_type === 'message' ? 'Reported message, with the messages before it' : 'Messages attached by the reporter'}</p>{ev.length ? ev.map((m, i) => <p key={i} className={cx(m.reported && 'rounded-md bg-clay-100 px-1.5 py-1 font-semibold text-clay-700')}><b>{m.from_reporter ? 'Reporter' : 'Reported'}:</b> {m.body}</p>) : <p className="text-ink-muted">No messages.</p>}</div>;
 }
 
 export function AdminReports() {
@@ -99,6 +99,7 @@ export function AdminReports() {
   const { data, loading, error, reload } = useAsync(() => api.staffListReports(status), [status]);
   const [act, setAct] = useState<{ r: Report; resolution: 'actioned' | 'dismissed'; content: ContentStatus | null } | null>(null);
   const [note, setNote] = useState(''); const [suspend, setSuspend] = useState<Report | null>(null);
+  const [group, setGroup] = useState<'items' | 'members'>('items');
   const counts = useMemo(() => { const m = new Map<string, number>(); (data ?? []).forEach((r) => m.set(r.target_id, (m.get(r.target_id) ?? 0) + 1)); return m; }, [data]);
   const doResolve = async () => {
     if (!act) return;
@@ -106,8 +107,11 @@ export function AdminReports() {
   };
   return (
     <div>
-      <div className="mb-4"><Tabs value={status} onChange={setStatus} items={[{ id: 'open', label: 'Open' }, { id: 'actioned', label: 'Actioned' }, { id: 'dismissed', label: 'Dismissed' }, { id: 'all', label: 'All' }]} /></div>
-      {loading ? <SkeletonCards n={2} /> : error ? <ErrorState message={error} onRetry={() => reload()} /> : !data?.length ? <EmptyState icon={<Flag size={22} />} title="Nothing here">No reports match this filter.</EmptyState> : (
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <Tabs value={status} onChange={setStatus} items={[{ id: 'open', label: 'Open' }, { id: 'actioned', label: 'Actioned' }, { id: 'dismissed', label: 'Dismissed' }, { id: 'all', label: 'All' }]} />
+        <Tabs value={group} onChange={setGroup} items={[{ id: 'items', label: 'By report' }, { id: 'members', label: 'By member' }]} />
+      </div>
+      {group === 'members' && data ? <ByMember reports={data} onSuspend={(id) => setSuspend({ reported_user_id: id } as Report)} /> : loading ? <SkeletonCards n={2} /> : error ? <ErrorState message={error} onRetry={() => reload()} /> : !data?.length ? <EmptyState icon={<Flag size={22} />} title="Nothing here">No reports match this filter.</EmptyState> : (
         <ul className="space-y-4">{data.map((r) => (
           <li key={r.id} className="card p-4 sm:p-5">
             <div className="flex flex-wrap items-center gap-2">
@@ -139,6 +143,33 @@ export function AdminReports() {
   );
 }
 
+/** Repeat-offender view: who is being reported most, and for what. */
+function ByMember({ reports, onSuspend }: { reports: Report[]; onSuspend: (id: string) => void }) {
+  const { me } = useAuth();
+  const groups = useMemo(() => {
+    const m = new Map<string, Report[]>();
+    reports.filter((r) => r.reported_user_id).forEach((r) => m.set(r.reported_user_id!, [...(m.get(r.reported_user_id!) ?? []), r]));
+    return [...m.entries()].sort((a, b) => b[1].length - a[1].length);
+  }, [reports]);
+  const names = useAsync(async () => new Map(await Promise.all(groups.map(async ([id]) => [id, (await api.staffGetMemberById(id))?.username ?? null] as const))), [groups.map((g) => g[0]).join()]);
+  if (!groups.length) return <EmptyState icon={<Flag size={22} />} title="Nothing here">No reports against members in this filter.</EmptyState>;
+  return (
+    <ul className="space-y-3">{groups.map(([id, rs]) => {
+      const reasons = [...new Set(rs.map((r) => REPORT_REASONS.find((x) => x.id === r.reason)?.label ?? r.reason))];
+      const reporters = new Set(rs.map((r) => r.reporter_id)).size;
+      return (
+        <li key={id} className={cx('card flex flex-wrap items-center gap-3 p-4', reporters >= 3 && 'ring-2 ring-clay-500/40')}>
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold">{names.data?.get(id) ? `@${names.data.get(id)}` : 'Deleted member'} <span className="font-normal text-ink-muted">· {rs.length} {rs.length === 1 ? 'report' : 'reports'} from {reporters} {reporters === 1 ? 'member' : 'members'}</span></p>
+            <p className="mt-0.5 text-xs text-ink-muted">{reasons.join(' · ')}</p>
+            {reporters >= 3 && <p className="mt-1 text-xs font-bold text-clay-700">Pattern: three or more members have reported this account.</p>}
+          </div>
+          {me?.role === 'admin' && <Button size="sm" variant="danger" onClick={() => onSuspend(id)}><Ban size={15} />Suspend</Button>}
+        </li>);
+    })}</ul>
+  );
+}
+
 /* ---------------------------------------------------------------- Content */
 export function AdminContent() {
   const toast = useToast();
@@ -146,7 +177,7 @@ export function AdminContent() {
   const [q, setQ] = useState(''); const [status, setStatus] = useState<ContentStatus | 'any'>('any');
   const posts = useAsync(async () => {
     if (tab === 'comments') return [] as Post[];
-    if (tab === 'attention') { const [a, b] = await Promise.all([api.listPosts({ status: 'under_review', limit: 50 }), api.listPosts({ status: 'published', limit: 100 })]); return [...a, ...b.filter((p) => p.sensitive && !a.some((x) => x.id === p.id))].slice(0, 60); }
+    if (tab === 'attention') return api.staffReviewQueue();     // computed by the database: auto-hidden + sensitive-and-unreviewed
     return api.listPosts({ status, search: q || undefined, limit: 50 });
   }, [tab, status, q]);
   const comments = useAsync(() => (tab === 'comments' ? api.staffListComments(status) : Promise.resolve([] as Comment[])), [tab, status]);
@@ -223,7 +254,8 @@ export function AdminUsers() {
 
 /* ---------------------------------------------------------------- Categories + situations */
 export function AdminCategories() {
-  const toast = useToast(); const { allCategories, allSituations, cat } = useTaxonomy();
+  const toast = useToast(); const { allCategories, allSituations, cat, allWishTopics } = useTaxonomy();
+  const [topic, setTopic] = useState<{ slug: string; label: string; isNew: boolean } | null>(null);
   const [edit, setEdit] = useState<Partial<Category> | null>(null);
   const [sit, setSit] = useState<{ id?: string; label: string; slug: string; category_id: string | null } | null>(null);
   const save = async () => {
@@ -249,6 +281,17 @@ export function AdminCategories() {
             <Button size="sm" variant="quiet" onClick={async () => { try { await api.adminSaveSituation({ id: s.id, slug: s.slug, label: s.label, is_active: !s.is_active }); invalidateTaxonomy(); } catch (e) { toast(errorMessage(e), 'error'); } }}>{s.is_active ? 'Retire' : 'Restore'}</Button></li>))}</ul>
       </section>
 
+      <section>
+        <div className="mb-3 flex items-center justify-between"><h2 className="text-xl font-semibold">“I wish I knew” themes</h2><Button size="sm" onClick={() => setTopic({ slug: '', label: '', isNew: true })}><Plus size={15} />New</Button></div>
+        <ul className="card divide-y divide-ivory-300">{allWishTopics.map((w) => (
+          <li key={w.slug} className="flex items-center gap-3 px-4 py-2.5 text-sm"><span className={cx('flex-1', !w.is_active && 'text-ink-faint line-through')}>{w.label}</span>
+            <Button size="sm" variant="quiet" onClick={() => setTopic({ slug: w.slug, label: w.label, isNew: false })}>Rename</Button>
+            <Button size="sm" variant="quiet" onClick={async () => { try { await api.adminSaveWishTopic({ slug: w.slug, label: w.label, is_active: !w.is_active }); invalidateTaxonomy(); } catch (e) { toast(errorMessage(e), 'error'); } }}>{w.is_active ? 'Retire' : 'Restore'}</Button></li>))}</ul>
+      </section>
+
+      <Sheet open={!!topic} onClose={() => setTopic(null)} title={topic?.isNew ? 'New theme' : 'Rename theme'} footer={<><Button variant="quiet" onClick={() => setTopic(null)}>Cancel</Button><Button disabled={!topic || topic.label.trim().length < 3} onClick={async () => { try { await api.adminSaveWishTopic({ slug: topic!.slug || topic!.label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40), label: topic!.label.trim() }); invalidateTaxonomy(); toast('Theme saved'); setTopic(null); } catch (e) { toast(errorMessage(e), 'error'); } }}>Save</Button></>}>
+        {topic && <Field label="Label (completes “I wish I’d known…”)" htmlFor="wl"><Input id="wl" value={topic.label} maxLength={60} onChange={(e) => setTopic({ ...topic, label: e.target.value })} placeholder="e.g. Before buying a home" /></Field>}
+      </Sheet>
       <Sheet open={!!edit} onClose={() => setEdit(null)} title={edit?.id ? 'Edit category' : 'New category'} footer={<><Button variant="quiet" onClick={() => setEdit(null)}>Cancel</Button><Button onClick={save} disabled={!edit?.name || edit.name.length < 2}>Save</Button></>}>
         {edit && <div className="space-y-4">
           <Field label="Name" htmlFor="cn"><Input id="cn" value={edit.name ?? ''} maxLength={40} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></Field>

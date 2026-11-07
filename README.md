@@ -46,11 +46,14 @@ All authorisation is enforced in PostgreSQL; the React app only hides UI.
 | Library | DB trigger requires author consent, published status and (for sensitive posts) explicit staff approval |
 | Files | One private bucket (`verification-evidence`), per-user folders, admin read via signed URLs. Avatars are generated shapes — no photos stored |
 
-**134 assertions** exercise these rules against a real PostgreSQL (escalation attempts, anonymity leaks, blocks, message isolation, suspension, appeals, storage…):
+**151 assertions** exercise these rules against a real PostgreSQL (escalation attempts, anonymity leaks, blocks, message isolation, suspension, appeals, storage…):
 
 ```bash
 npm run test:db      # needs PostgreSQL server binaries; spins up a throwaway cluster
+npm run test:e2e     # 54 browser checks (Playwright) over two members, incl. admin flows
+npm test             # typecheck + both
 ```
+(If Chromium is already installed, point the browser tests at it with `CHROMIUM_PATH=/path/to/chrome`.) CI runs all of it on every push — see `.github/workflows/ci.yml`.
 
 ## What this app deliberately does *not* claim
 
@@ -59,18 +62,23 @@ npm run test:db      # needs PostgreSQL server binaries; spins up a throwaway cl
 - **"Verified contributor"** means a person on the team reviewed a statement/file by hand — not an identity or age check.
 - **Anonymous ≠ untraceable**: moderators can see the account behind a reported anonymous post. This is disclosed in the composer, onboarding and Safety centre.
 - Notification settings control in-app inbox badges only; email/push delivery is not implemented.
+- `/privacy` and `/terms` are **drafts** that describe what the software does; they need lawyer review and the highlighted placeholders filled in before launch.
 - Helpline guidance links to findahelpline.com rather than inventing country-specific numbers.
 
 ## Project layout
 
 ```
-supabase/migrations   schema → logic (triggers/RPCs) → security (views/RLS/grants) → storage
+supabase/migrations   schema → logic (triggers/RPCs) → security (views/RLS/grants) → storage → additions (edit post, message reports, data export)
+e2e/run.mjs           repeatable browser test-suite
 supabase/seed.sql     configuration only
 supabase/tests        Postgres-backed security test-suite
 src/data              Api contract + supabaseApi (real) + previewApi (labelled local emulation)
 src/components        design system (ui.tsx), shell, post card, comments, safety/report
 src/pages             auth, onboarding, home, explore, share, library, inbox, understand, wish, profile, settings, safety, admin
 ```
+
+## Deploying the front-end
+Any static host works; every route must fall back to `index.html`. Configs are included for Vercel (`vercel.json`, which also sets security headers) and Netlify (`public/_redirects`). Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the host's environment. A web-app manifest is included so the site can be installed to a phone's home screen (there is no offline mode).
 
 ## Production checklist
 

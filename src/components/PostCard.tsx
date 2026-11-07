@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Bookmark, BookmarkCheck, Ban, BookOpen, EyeOff, Flag, Heart, HandHeart, Lightbulb, Link2, MessageCircle,
-  MoreHorizontal, ShieldAlert, Trash2,
+  MoreHorizontal, Pencil, ShieldAlert, Trash2,
 } from 'lucide-react';
 import { api } from '@/data/api';
 import { errorMessage } from '@/lib/errors';
@@ -10,7 +10,7 @@ import type { Post, ReactionType } from '@/lib/types';
 import { cx, timeAgo, toneClass } from '@/lib/util';
 import { useTaxonomy } from '@/state/taxonomy';
 import { useToast } from '@/state/toast';
-import { AnonymousAvatar, Avatar, CategoryPill, ConfirmSheet, Menu, MenuItem, VerifiedBadge } from './ui';
+import { AnonymousAvatar, Avatar, Button, CategoryPill, ConfirmSheet, Counter, Field, Input, Menu, MenuItem, Notice, Sheet, Textarea, VerifiedBadge } from './ui';
 import { ReportDialog } from './Safety';
 
 export const REACTIONS: { type: ReactionType; label: string; icon: typeof Heart; key: 'felt_count' | 'helpful_count' | 'strength_count' }[] = [
@@ -51,12 +51,37 @@ export function StatusBanner({ post }: { post: Post }) {
   return <div className="mb-3 flex items-center gap-2 rounded-lg bg-clay-100 px-3 py-2 text-xs font-semibold text-clay-700"><EyeOff size={14} />{text}</div>;
 }
 
+function EditPostSheet({ post, onClose, onSaved }: { post: Post; onClose: () => void; onSaved: (title: string, body: string) => void }) {
+  const toast = useToast();
+  const [title, setTitle] = useState(post.title); const [body, setBody] = useState(post.body); const [busy, setBusy] = useState(false);
+  const valid = title.trim().length >= 4 && body.trim().length >= 10;
+  const save = async () => {
+    setBusy(true);
+    try { await api.editPost(post.id, title, body); onSaved(title.trim(), body.trim()); toast('Post updated'); onClose(); }
+    catch (e) { toast(errorMessage(e), 'error'); } finally { setBusy(false); }
+  };
+  return (
+    <Sheet open onClose={onClose} title="Edit your post" footer={<><Button variant="quiet" onClick={onClose}>Cancel</Button><Button loading={busy} disabled={!valid} onClick={save}>Save changes</Button></>}>
+      <div className="space-y-4">
+        <Field label="Title" htmlFor="et" hint={<Counter value={title.length} max={140} />}><Input id="et" maxLength={140} value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
+        <Field label="Your story" htmlFor="eb" hint={<Counter value={body.length} max={5000} />}><Textarea id="eb" maxLength={5000} value={body} onChange={(e) => setBody(e.target.value)} className="min-h-[200px]" /></Field>
+        {(post.allow_curation || post.comment_count > 0) && (
+          <Notice tone="care" title="Before you save">
+            {post.comment_count > 0 && 'Replies were written to what you originally said — consider adding a note rather than rewriting. '}
+            {post.allow_curation && 'If editors featured this in a Library collection, it will be removed from it until they review the new version.'}
+          </Notice>)}
+      </div>
+    </Sheet>
+  );
+}
+
 export default function PostCard({ post, onChange, detail, hideCategory }: { post: Post; onChange?: (p: Post | null) => void; detail?: boolean; hideCategory?: boolean }) {
   const { cat, wishLabel } = useTaxonomy();
   const toast = useToast();
   const [p, setP] = useState(post);
   const [report, setReport] = useState(false);
   const [confirm, setConfirm] = useState<null | 'delete' | 'block'>(null);
+  const [editing, setEditing] = useState(false);
   const category = cat(p.category_id);
   const tone = category?.tone ?? 'plum';
   const update = (n: Post) => { setP(n); onChange?.(n); };
@@ -98,6 +123,7 @@ export default function PostCard({ post, onChange, detail, hideCategory }: { pos
           <Menu trigger={<MoreHorizontal size={19} />}>
             {(close) => (<>
               <MenuItem icon={<Link2 size={17} />} onClick={() => { close(); void navigator.clipboard?.writeText(`${location.origin}/post/${p.id}`).then(() => toast('Link copied')); }}>Copy link</MenuItem>
+              {p.is_mine && p.status !== 'removed' && p.status !== 'hidden' && <MenuItem icon={<Pencil size={17} />} onClick={() => { close(); setEditing(true); }}>Edit post</MenuItem>}
               {p.is_mine && p.kind !== 'question' && <MenuItem icon={<BookOpen size={17} />} onClick={() => { close(); void toggleConsent(); }}>{p.allow_curation ? 'Withdraw Library consent' : 'Allow Library feature'}</MenuItem>}
               {p.is_mine
                 ? <MenuItem danger icon={<Trash2 size={17} />} onClick={() => { close(); setConfirm('delete'); }}>Delete post</MenuItem>
@@ -150,6 +176,7 @@ export default function PostCard({ post, onChange, detail, hideCategory }: { pos
         </div>
       </div>
 
+      {editing && <EditPostSheet post={p} onClose={() => setEditing(false)} onSaved={(title, body) => update({ ...p, title, body, allow_curation: p.allow_curation })} />}
       <ReportDialog open={report} onClose={() => setReport(false)} type="post" targetId={p.id} label="post" />
       <ConfirmSheet open={confirm === 'delete'} onClose={() => setConfirm(null)} title="Delete this post?" confirmLabel="Delete" danger onConfirm={remove}>
         This permanently removes your post, its comments and any Library entry that features it.

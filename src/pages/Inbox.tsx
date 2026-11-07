@@ -109,6 +109,8 @@ export function Conversation() {
   const [me, setMe] = useState<string | null>(null);
   const [text, setText] = useState(''); const [sending, setSending] = useState(false);
   const [dlg, setDlg] = useState<null | 'report' | 'block' | 'delete'>(null);
+  const [picked, setPicked] = useState<string | null>(null);
+  const [reportMsg, setReportMsg] = useState<string | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
   useTitle(conv.data ? `@${conv.data.other_username}` : 'Conversation');
 
@@ -117,6 +119,8 @@ export function Conversation() {
   }, [id]);
   useEffect(() => { void api.getMe().then((m) => setMe(m?.id ?? null)); void load(); return api.subscribeMessages(id, () => { void load(); void conv.reload(true); }); // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, load]);
+  // Realtime is the fast path; a slow poll guarantees the thread still updates if the socket drops.
+  useEffect(() => { const t = setInterval(() => { void load(); }, 8000); return () => clearInterval(t); }, [load]);
   useEffect(() => { bottom.current?.scrollIntoView({ block: 'end' }); }, [msgs?.length]);
 
   const send = async () => {
@@ -155,7 +159,10 @@ export function Conversation() {
             <div key={m.id}>
               {(!prev || +new Date(m.created_at) - +new Date(prev.created_at) > 3600_000) && <p className="my-3 text-center text-[11px] font-semibold text-ink-faint">{fullDate(m.created_at)}</p>}
               <div className={cx('flex', mine ? 'justify-end' : 'justify-start', newGroup && 'mt-2.5')}>
-                <p title={fullDate(m.created_at)} className={cx('max-w-[82%] whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 text-[15px] leading-snug shadow-soft', mine ? 'rounded-br-md bg-plum-700 text-ivory-50' : 'rounded-bl-md border border-ivory-300 bg-ivory-50 text-ink')}>{m.body}</p>
+                <div className={cx('flex max-w-[82%] flex-col', mine ? 'items-end' : 'items-start')}>
+                  <p onClick={() => !mine && setPicked(picked === m.id ? null : m.id)} title={fullDate(m.created_at)} className={cx('whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 text-[15px] leading-snug shadow-soft', mine ? 'rounded-br-md bg-plum-700 text-ivory-50' : 'cursor-pointer rounded-bl-md border border-ivory-300 bg-ivory-50 text-ink')}>{m.body}</p>
+                  {!mine && picked === m.id && <button onClick={() => setReportMsg(m.id)} className="mt-1 flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold text-clay-700 hover:bg-clay-100"><Flag size={12} />Report this message</button>}
+                </div>
               </div>
             </div>);
         })}
@@ -175,6 +182,7 @@ export function Conversation() {
         )}
       </div>
 
+      {reportMsg && <ReportDialog open onClose={() => { setReportMsg(null); setPicked(null); }} type="message" targetId={reportMsg} label="message" />}
       <ReportDialog open={dlg === 'report'} onClose={() => setDlg(null)} type="conversation" targetId={id} label="conversation" />
       <ConfirmSheet open={dlg === 'block'} onClose={() => setDlg(null)} title={`${c.blocked ? 'Unblock' : 'Block'} @${c.other_username}?`} confirmLabel={c.blocked ? 'Unblock' : 'Block'} danger={!c.blocked}
         onConfirm={async () => { await api.setBlock(c.other_id, !c.blocked); setDlg(null); toast(c.blocked ? 'Unblocked' : 'Blocked'); void conv.reload(true); }}>

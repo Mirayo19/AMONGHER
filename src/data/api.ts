@@ -17,6 +17,7 @@ export interface PostQuery {
   search?: string;
   status?: ContentStatus | 'any';
   allowCurationOnly?: boolean;
+  ids?: string[];
   limit?: number;
   offset?: number;
 }
@@ -55,6 +56,7 @@ export interface Api {
   resendVerification(email: string): Promise<void>;
   usernameAvailable(username: string): Promise<boolean>;
   deleteAccount(): Promise<void>;
+  exportMyData(): Promise<Record<string, unknown>>;
 
   // ---- me
   getMe(): Promise<Me | null>;
@@ -72,6 +74,7 @@ export interface Api {
   getPost(id: string): Promise<Post | null>;
   createPost(p: NewPost): Promise<string>;
   deletePost(id: string): Promise<void>;
+  editPost(id: string, title: string, body: string): Promise<void>;
   setCurationConsent(postId: string, allow: boolean): Promise<void>;
   setReaction(postId: string, type: ReactionType | null): Promise<void>;
   setBookmark(postId: string, on: boolean): Promise<void>;
@@ -126,6 +129,7 @@ export interface Api {
   staffSetContentStatus(type: 'post' | 'comment', id: string, status: 'published' | 'hidden' | 'removed', note?: string): Promise<void>;
   staffListComments(status: ContentStatus | 'any'): Promise<Comment[]>;
   staffGetComment(id: string): Promise<Comment | null>;
+  staffReviewQueue(): Promise<Post[]>;
   staffGetMemberById(id: string): Promise<Member | null>;
   staffListLog(): Promise<LogEntry[]>;
 
@@ -139,6 +143,7 @@ export interface Api {
   adminResolveVerification(id: string, decision: 'approved' | 'rejected', note?: string): Promise<void>;
   adminEvidenceUrl(path: string): Promise<string | null>;
   adminSaveCategory(c: Partial<Category> & { name: string; slug: string }): Promise<void>;
+  adminSaveWishTopic(w: Partial<WishTopic> & { label: string; slug: string }): Promise<void>;
   adminSaveSituation(s: Partial<Situation> & { label: string; slug: string }): Promise<void>;
   adminSaveCollection(id: string | null, c: CollectionInput): Promise<void>;
   adminDeleteCollection(id: string): Promise<void>;

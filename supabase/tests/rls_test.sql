@@ -418,6 +418,56 @@ select t.root();
 select t.ok((select not public from storage.buckets where id = 'verification-evidence'), 'evidence bucket is private');
 
 -- ===================================================================
+-- 11b · Edit posts, message reports, review queue, data export  (migration 0005)
+-- ===================================================================
+select t.login('alice');
+select t.exec_id($$insert into public.posts (author_id, kind, category_id, title, body, allow_curation)
+  values (auth.uid(), 'experience', (select id from public.categories where slug='career'), 'Asking for a raise', 'I prepared three examples of my impact and it went well.', true) returning id$$, 'P5');
+select t.login('root');
+insert into public.collection_items (collection_id, post_id, item_type) values (t.u('COLL_P'), t.u('P5'), 'advice');
+select t.login('bea');
+select t.ok((select count(*) from public.library_entries where id = t.u('P5')) = 1, 'P5 is featured before editing');
+select t.fails($$select public.edit_post(t.u('P5'), 'Hijacked title here', 'Someone else rewriting this post body.')$$, 'forbidden', 'only the author can edit a post');
+select t.login('alice');
+select public.edit_post(t.u('P5'), 'Asking for a raise (updated)', 'I prepared three examples of my impact. Looking back, a stalked-out calendar of wins helped most.');
+select t.ok((select title = 'Asking for a raise (updated)' and sensitive from public.post_feed where id = t.u('P5')), 'editing re-runs sensitivity detection');
+select t.fails($$select public.edit_post(t.u('P5'), 'ab', 'too short title should be rejected by the table checks')$$, 'check', 'edit still enforces length limits');
+select t.login('bea');
+select t.ok((select count(*) from public.library_entries where id = t.u('P5')) = 0, 'editing a featured post removes it from the Library until re-reviewed');
+select t.login('alice');
+select t.ok((select reviewed_at is null from public.posts where id = t.u('P5')), 'editing clears the editorial review stamp');
+
+select t.login('mod');
+select t.ok((select count(*) from public.staff_review_queue() q where q = t.u('P5')) = 1, 'edited sensitive post appears in the staff review queue');
+select t.login('bea');
+select t.fails($$select * from public.staff_review_queue()$$, 'forbidden', 'members cannot read the review queue');
+
+-- report one message
+select t.login('alice');
+select t.exec_id($$select id from public.messages where conversation_id = t.u('CONV') and sender_id = t.u('cara') order by created_at limit 1$$, 'MSG_C');
+select t.exec_id($$select id from public.messages where conversation_id = t.u('CONV') and sender_id = t.u('alice') order by created_at desc limit 1$$, 'MSG_A');
+select t.exec_id($$select public.submit_report('message', t.u('MSG_C'), 'harassment', 'this one')$$, 'REP_MSG');
+select t.fails($$select public.submit_report('message', t.u('MSG_A'), 'spam')$$, 'cannot_report_self', 'cannot report your own message');
+select t.login('bea');
+select t.fails($$select public.submit_report('message', t.u('MSG_C'), 'spam')$$, 'target_not_found', 'cannot report a message from a conversation you are not in');
+select t.root();
+select t.ok((select target_type = 'message' and reported_user_id = t.u('cara') and (evidence -> -1 ->> 'reported')::boolean from public.reports where id = t.u('REP_MSG')), 'message report records the sender and flags the reported message in the evidence');
+
+-- data export
+select t.login('alice');
+select t.ok((select (public.export_my_data() ->> 'account') like '%alice@example.test%'), 'export includes the member''s own email');
+select t.ok(public.export_my_data()::text not like '%bea@example.test%' and public.export_my_data()::text not like '%cara@example.test%', 'export never contains other members'' emails');
+select t.ok(jsonb_array_length(public.export_my_data() -> 'posts') >= 2 and jsonb_array_length(public.export_my_data() -> 'messages') >= 2, 'export includes her posts and her side of conversations');
+select t.ok(not (public.export_my_data() -> 'posts' -> 0 ? 'fts'), 'export omits the internal search vector');
+select t.login('anon');
+select t.fails($$select public.export_my_data()$$, 'permission denied', 'anonymous visitors cannot export');
+
+select t.root();
+select t.ok((select coalesce(string_agg(p.proname, ', '), '') from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+              where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute')) = 'username_available',
+            'GUARD: the only public function anonymous visitors can execute is username_available');
+
+-- ===================================================================
 -- 12 · Account deletion
 -- ===================================================================
 select t.login('bea');

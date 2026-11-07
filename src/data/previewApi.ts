@@ -243,6 +243,21 @@ export function createPreviewApi(): Api {
       const n = username.toLowerCase();
       return USERNAME_RE.test(n) && !RESERVED.includes(n) && !db.users.some((u) => u.username === n);
     },
+    async exportMyData() {
+      const u = must(); const mine = <T extends { user_id?: string }>(a: T[]) => a.filter((x) => x.user_id === u.id);
+      const convs = new Set(db.parts.filter((p) => p.user_id === u.id).map((p) => p.conversation_id));
+      return {
+        exported_at: now(), account: { id: u.id, email: u.email },
+        profile: { username: u.username, bio: u.bio, location: u.location, interests: u.interests, visibility: u.visibility },
+        settings: u.settings, posts: db.posts.filter((p) => p.author_id === u.id), comments: db.comments.filter((c) => c.author_id === u.id),
+        reactions: mine(db.reactions), bookmarks: mine(db.bookmarks), following: db.follows.filter((f) => f.follower_id === u.id),
+        blocked_members: db.blocks.filter((b) => b.blocker_id === u.id), saved_collections: mine(db.saved), situations_shared: mine(db.profSit),
+        message_requests: db.requests.filter((r) => r.requester_id === u.id || r.recipient_id === u.id),
+        messages: db.messages.filter((m) => convs.has(m.conversation_id)).map((m) => ({ conversation_id: m.conversation_id, from_me: m.sender_id === u.id, body: m.body, sent_at: m.created_at })),
+        reports_filed: db.reports.filter((r) => r.reporter_id === u.id).map(({ evidence: _e, ...r }) => r), appeals: db.appeals.filter((a) => a.user_id === u.id),
+        verification_requests: db.verifications.filter((v) => v.user_id === u.id),
+      };
+    },
     async deleteAccount() {
       const u = must(); const id = u.id;
       db.users = db.users.filter((x) => x.id !== id);
@@ -301,6 +316,7 @@ export function createPreviewApi(): Api {
       if (q.authorId) out = out.filter((p) => p.author_id === q.authorId);
       if (q.bookmarked) out = out.filter((p) => p.bookmarked);
       if (q.allowCurationOnly) out = out.filter((p) => p.allow_curation);
+      if (q.ids) out = out.filter((p) => q.ids!.includes(p.id));
       if (q.search?.trim()) out = out.filter((p) => matches(`${p.title} ${p.body}`, q.search!));
       out.sort(q.filter === 'popular' ? (a, b) => b.popularity - a.popularity || b.created_at.localeCompare(a.created_at) : (a, b) => b.created_at.localeCompare(a.created_at));
       const o = q.offset ?? 0; return out.slice(o, o + (q.limit ?? 20));
@@ -323,6 +339,18 @@ export function createPreviewApi(): Api {
       db.posts = db.posts.filter((x) => x.id !== id); db.comments = db.comments.filter((c) => c.post_id !== id);
       db.items = db.items.filter((i) => i.post_id !== id); db.reactions = db.reactions.filter((r) => r.post_id !== id);
       db.bookmarks = db.bookmarks.filter((b) => b.post_id !== id); save();
+    },
+    async editPost(id, title, body) {
+      const u = mustActive(); const p = db.posts.find((x) => x.id === id);
+      if (!p || p.author_id !== u.id) throw FORBIDDEN();
+      if (p.status === 'hidden' || p.status === 'removed') throw new AppError('post_locked', 'This post is locked by a moderator.');
+      const t = title.trim(); const b = body.trim();
+      if (t.length < 4 || t.length > 140 || b.length < 10 || b.length > 5000) throw new AppError('invalid_length', 'Check the title and body length.');
+      if (t === p.title && b === p.body) return;
+      const cat = db.categories.find((c) => c.id === p.category_id);
+      p.title = t; p.body = b; p.sensitive = !!cat?.sensitive || looksSensitive(`${t} ${b}`); p.reviewed_at = null;
+      db.items = db.items.filter((i) => i.post_id !== id);   // editing voids editorial review
+      save();
     },
     async setCurationConsent(postId, allow) {
       const u = must(); const p = db.posts.find((x) => x.id === postId); if (!p || p.author_id !== u.id) throw FORBIDDEN();
@@ -367,6 +395,12 @@ export function createPreviewApi(): Api {
 
     // ---- people
     async getMember(username) { const v = must(); const u = db.users.find((x) => x.username === username.toLowerCase()); return u ? memberView(u, v) : null; },
+    async staffReviewQueue() {
+      const v = mustStaff();
+      return db.posts.filter((p) => p.status === 'under_review' || (p.status === 'published' && p.sensitive && !p.reviewed_at))
+        .sort((a, b) => Number(b.status === 'under_review') - Number(a.status === 'under_review') || b.created_at.localeCompare(a.created_at))
+        .map((p) => postView(p, v)).filter(Boolean) as Post[];
+    },
     async staffGetMemberById(id) { const v = must(); const u = user(id); return u ? memberView(u, v) : null; },
     async setFollow(userId, on) {
       const u = mustActive(); db.follows = db.follows.filter((f) => !(f.follower_id === u.id && f.followee_id === userId));
@@ -492,7 +526,15 @@ export function createPreviewApi(): Api {
       if (type === 'post') reported = db.posts.find((p) => p.id === targetId)?.author_id ?? null;
       else if (type === 'comment') reported = db.comments.find((c) => c.id === targetId)?.author_id ?? null;
       else if (type === 'user') reported = user(targetId)?.id ?? null;
-      else {
+      else if (type === 'message') {
+        const m = db.messages.find((x) => x.id === targetId);
+        const mine = m && db.parts.find((p) => p.conversation_id === m.conversation_id && p.user_id === me.id);
+        if (m && mine && (!mine.cleared_at || m.created_at > mine.cleared_at)) {
+          reported = m.sender_id;
+          evidence = db.messages.filter((x) => x.conversation_id === m.conversation_id && x.created_at <= m.created_at && (!mine.cleared_at || x.created_at > mine.cleared_at)).slice(-6)
+            .map((x) => ({ from_reporter: x.sender_id === me.id, body: x.body, at: x.created_at, reported: x.id === m.id }));
+        }
+      } else {
         const mine = db.parts.find((p) => p.conversation_id === targetId && p.user_id === me.id);
         reported = mine ? db.parts.find((p) => p.conversation_id === targetId && p.user_id !== me.id)?.user_id ?? null : null;
         if (mine) evidence = db.messages.filter((m) => m.conversation_id === targetId && (!mine.cleared_at || m.created_at > mine.cleared_at)).slice(-20)
@@ -604,6 +646,11 @@ export function createPreviewApi(): Api {
       mustAdmin(); const ex = c.id ? db.categories.find((x) => x.id === c.id) : db.categories.find((x) => x.slug === c.slug);
       if (ex) Object.assign(ex, c); else db.categories.push({ id: uid(), description: '', icon: 'sparkles', tone: 'plum', sensitive: false, sort: db.categories.length + 1, is_active: true, ...c } as Category);
       log('save_categories', 'categories', null, c.name); save();
+    },
+    async adminSaveWishTopic(w) {
+      mustAdmin(); const ex = db.wishTopics.find((x) => x.slug === w.slug);
+      if (ex) Object.assign(ex, w); else db.wishTopics.push({ sort: db.wishTopics.length + 1, is_active: true, ...w } as WishTopic);
+      log('save_wish_topics', 'wish_topics', null, w.label); save();
     },
     async adminSaveSituation(s) {
       mustAdmin(); const ex = s.id ? db.situations.find((x) => x.id === s.id) : null;

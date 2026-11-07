@@ -6,6 +6,7 @@ import Landing from '@/pages/Landing';
 import { Forgot, Login, ResetPassword, SignUp, VerifyEmail } from '@/pages/Auth';
 import Onboarding from '@/pages/Onboarding';
 import Setup from '@/pages/Setup';
+import { Privacy, Terms } from '@/pages/Legal';
 import Home from '@/pages/Home';
 import Explore, { ExploreCategory } from '@/pages/Explore';
 import Share, { ComposerRoute } from '@/pages/Share';
@@ -28,6 +29,8 @@ export default function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/safety" element={<SafetyRoute />} />
       <Route path="/setup" element={<Setup />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
       <Route element={<PublicOnly />}>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />

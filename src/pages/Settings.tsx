@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BadgeCheck, Clock, LogOut, ShieldCheck, Trash2, UserX } from 'lucide-react';
+import { BadgeCheck, Clock, Download, LogOut, ShieldCheck, Trash2, UserX } from 'lucide-react';
 import { api } from '@/data/api';
 import { isPreviewMode } from '@/lib/config';
 import { errorMessage } from '@/lib/errors';
@@ -25,6 +25,7 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [del, setDel] = useState(false); const [delText, setDelText] = useState('');
   const [pw, setPw] = useState(''); const [pwBusy, setPwBusy] = useState(false);
+  const [exporting, setExporting] = useState(false);
   useEffect(() => { if (me) { setMotif(me.avatar_motif); setTone(me.avatar_tone); setBio(me.bio ?? ''); setLoc(me.location ?? ''); setInterests(me.interests); } }, [me?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const blocked = useAsync(() => api.listBlocked(), []);
   const verification = useAsync(() => api.getMyVerification(), []);
@@ -87,11 +88,25 @@ export default function Settings() {
           <div className="flex justify-between gap-4"><dt className="text-ink-muted">Email</dt><dd className="truncate font-semibold">{me.email} <span className="font-normal text-ink-muted">(private)</span></dd></div>
           <div className="flex justify-between gap-4"><dt className="text-ink-muted">Age</dt><dd className="font-semibold">18+ self-declared</dd></div>
         </dl>
+        <p className="mt-3 text-sm"><Link to="/privacy" className="font-semibold text-plum-700 underline">Privacy policy</Link> · <Link to="/terms" className="font-semibold text-plum-700 underline">Terms</Link></p>
         <Notice tone="info" className="mt-4">You confirmed you’re 18 or older at sign-up. This is a declaration — AMONGHER does not independently verify age, and doesn’t claim to.</Notice>
         <form className="mt-5 flex items-end gap-2" onSubmit={async (e) => { e.preventDefault(); setPwBusy(true); try { await api.updatePassword(pw); setPw(''); toast('Password changed'); } catch (ex) { toast(errorMessage(ex), 'error'); } finally { setPwBusy(false); } }}>
           <div className="flex-1"><Field label="Change password" htmlFor="npw"><Input id="npw" type="password" autoComplete="new-password" minLength={8} value={pw} onChange={(e) => setPw(e.target.value)} placeholder="New password (8+ characters)" /></Field></div>
           <Button type="submit" variant="secondary" loading={pwBusy} disabled={pw.length < 8}>Update</Button>
         </form>
+        <div className="mt-6 border-t border-ivory-300 pt-5">
+          <p className="text-sm font-semibold">Your data</p>
+          <p className="hint">Download everything AMONGHER holds about you — profile, posts, comments, saved items, settings and your side of your conversations — as a JSON file.</p>
+          <Button variant="secondary" size="sm" className="mt-3" loading={exporting} onClick={async () => {
+            setExporting(true);
+            try {
+              const data = await api.exportMyData();
+              const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+              const a = Object.assign(document.createElement('a'), { href: url, download: `amongher-${me.username}-data.json` }); a.click(); URL.revokeObjectURL(url);
+              toast('Your data has been downloaded');
+            } catch (e) { toast(errorMessage(e), 'error'); } finally { setExporting(false); }
+          }}><Download size={15} />Download my data</Button>
+        </div>
         <div className="mt-6 flex flex-wrap gap-2 border-t border-ivory-300 pt-5">
           <Button variant="secondary" onClick={async () => { await signOut(); nav('/'); }}><LogOut size={16} />Sign out</Button>
           <Button variant="quiet" className="text-clay-700 hover:bg-clay-100" onClick={() => setDel(true)}><Trash2 size={16} />Delete my account</Button>

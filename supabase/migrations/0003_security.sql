@@ -20,7 +20,10 @@ revoke all on all sequences in schema public from anon, authenticated;
 revoke execute on all functions in schema public from public, anon, authenticated;
 alter default privileges in schema public revoke all on tables    from anon, authenticated;
 alter default privileges in schema public revoke all on sequences from anon, authenticated;
-alter default privileges in schema public revoke execute on functions from public, anon, authenticated;
+-- NOTE: the "in schema" form cannot remove PostgreSQL's built-in "EXECUTE to PUBLIC" default,
+-- so this one is deliberately global (applies to functions this role creates from now on).
+alter default privileges revoke execute on functions from public;
+alter default privileges in schema public revoke execute on functions from anon, authenticated;
 
 -- ---------- Views ----------------------------------------------------
 

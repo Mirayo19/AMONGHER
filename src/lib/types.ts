@@ -81,7 +81,7 @@ export interface ConversationSummary {
 }
 export interface Message { id: string; conversation_id: string; sender_id: string | null; body: string; created_at: string }
 
-export type ReportTarget = 'post' | 'comment' | 'user' | 'conversation';
+export type ReportTarget = 'post' | 'comment' | 'user' | 'conversation' | 'message';
 export type ReportReason =
   | 'harassment' | 'abuse_or_threats' | 'hate' | 'self_harm' | 'unsafe_advice'
   | 'privacy' | 'spam' | 'misinformation' | 'impersonation' | 'other';

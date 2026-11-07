@@ -121,7 +121,7 @@ export function SignUp() {
             <strong className="text-ink">I am 18 or older.</strong> I understand this is a self-declaration — AMONGHER does not independently verify age.
           </Checkbox>
           <Checkbox checked={guidelines} onChange={setGuidelines} error={tried && !guidelines}>
-            I’ve read the <Link to="/safety#guidelines" target="_blank" className="font-semibold text-plum-700 underline">Community Guidelines</Link>. AMONGHER is a space for women, and I’ll treat it that way.
+            I’ve read the <Link to="/safety#guidelines" target="_blank" className="font-semibold text-plum-700 underline">Community Guidelines</Link>, <Link to="/terms" target="_blank" className="font-semibold text-plum-700 underline">Terms</Link> and <Link to="/privacy" target="_blank" className="font-semibold text-plum-700 underline">Privacy policy</Link>. AMONGHER is a space for women, and I’ll treat it that way.
           </Checkbox>
         </div>
         {err && <p role="alert" className="text-sm font-medium text-clay-700">{err}</p>}
