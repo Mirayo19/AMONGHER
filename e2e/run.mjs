@@ -18,7 +18,7 @@ const bad = (m) => { problems.push(m); console.log(`  ✘ ${m}`); };
 
 async function startServer() {
   if (process.env.BASE_URL) return;
-  server = spawn('npx', ['vite', '--port', String(PORT), '--host', '127.0.0.1', '--strictPort'], { stdio: 'ignore' });
+  server = spawn('npx', ['vite', '--port', String(PORT), '--host', '127.0.0.1', '--strictPort'], { stdio: 'ignore', detached: true });   // own process group, so we can stop vite itself, not just npx
   for (let i = 0; i < 60; i++) { try { if ((await fetch(BASE)).ok) return; } catch { /* not up yet */ } await new Promise((r) => setTimeout(r, 500)); }
   throw new Error('dev server did not start');
 }
@@ -65,7 +65,7 @@ async function main() {
 
   section('Public pages & guards');
   await page.goto(BASE); await sees('Learn from', 'landing renders'); await shot('landing');
-  for (const [path, text] of [['/privacy', 'Privacy policy'], ['/terms', 'Terms of use'], ['/safety', 'Safety centre'], ['/setup', 'Connect Supabase']]) { await page.goto(BASE + path); await sees(text, `${path} renders while signed out`); }
+  for (const [path, text] of [['/privacy', 'Privacy policy'], ['/terms', 'Terms of use'], ['/safety', 'Safety centre'], ['/setup', 'Connect Supabase']]) { await page.goto(BASE + path); await sees(text, `${path} renders while signed out`); if (path === '/privacy') await shot('privacy-draft'); }
   await page.goto(`${BASE}/home`); await page.waitForURL('**/login'); ok('signed-out /home redirects to /login');
   await page.goto(`${BASE}/signup`); await page.fill('#username', 'ab'); await sees('3–24 lowercase', 'username format validated');
   await page.fill('#username', 'admin'); await sees('taken or reserved', 'reserved username refused'); await shot('signup');
@@ -129,21 +129,21 @@ async function main() {
   await page.goto(`${BASE}/me`);
   const card = page.locator('article', { hasText: 'Negotiating my first salary' });
   await card.locator('button[aria-haspopup=menu]').click(); await page.getByRole('menuitem', { name: 'Edit post' }).click();
-  await page.fill('#et', 'Negotiating my first salary (edited)'); await page.getByRole('button', { name: 'Save changes' }).click();
+  await page.fill('#et', 'Negotiating my first salary (edited)'); await shot('edit-post'); await page.getByRole('button', { name: 'Save changes' }).click();
   await sees('Negotiating my first salary (edited)', 'author can edit her post');
-  await page.goto(`${BASE}/settings`);
+  await page.goto(`${BASE}/settings`); await page.getByRole('button', { name: 'Download my data' }).scrollIntoViewIfNeeded(); await shot('settings-your-data');
   const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Download my data' }).click()]);
   const data = JSON.parse(readFileSync(await dl.path(), 'utf8'));
   if (data.account?.email === 'alice@example.test' && data.posts?.length === 3 && JSON.stringify(data).indexOf('bea@example.test') === -1) ok('data export contains her own data (3 posts) and nobody else’s email'); else bad(`data export looks wrong: ${JSON.stringify(data).slice(0, 120)}`);
 
   section('Admin: dashboard, review queue, wish themes');
   await page.goto(`${BASE}/admin`); await sees('Admin dashboard', 'admin dashboard opens for admin'); await sees('Open reports', 'stats shown'); await shot('admin');
-  await page.goto(`${BASE}/admin/content`); await sees('Anyone had a difficult first gynaecologist visit?', 'sensitive post is in the review queue');
+  await page.goto(`${BASE}/admin/content`); await sees('Anyone had a difficult first gynaecologist visit?', 'sensitive post is in the review queue'); await shot('admin-review-queue');
   await page.locator('li', { hasText: 'Anyone had a difficult' }).getByRole('button', { name: 'Approve' }).click();
   await gone('Anyone had a difficult first gynaecologist visit?', 'approving removes it from the queue');
   await page.goto(`${BASE}/admin/reports`); await sees('Spam or selling', 'report visible to admin'); await shot('admin-reports');
-  await page.getByRole('tab', { name: 'By member' }).click(); await sees('@alice_a', 'reports can be grouped by member');
-  await page.goto(`${BASE}/admin/categories`); await page.getByRole('button', { name: 'New' }).nth(2).click();
+  await page.getByRole('tab', { name: 'By member' }).click(); await sees('@alice_a', 'reports can be grouped by member'); await shot('admin-by-member');
+  await page.goto(`${BASE}/admin/categories`); await page.getByText('knew” themes').first().scrollIntoViewIfNeeded(); await shot('admin-wish-themes'); await page.getByRole('button', { name: 'New' }).nth(2).click();
   await page.fill('#wl', 'Before buying a home'); await page.getByRole('button', { name: 'Save', exact: true }).click(); await sees('Theme saved', 'admin can add an “I wish I knew” theme');
   await page.goto(`${BASE}/wish`); await sees('Before buying a home', 'new theme appears on the Wish page');
   for (const p of ['users', 'collections', 'verification', 'appeals', 'activity']) {
@@ -156,7 +156,7 @@ async function main() {
   await login('bea@example.test');
   await page.goto(`${BASE}/inbox`); await page.locator('a[href^="/inbox/"]').first().click();
   await page.getByText('Happy to help, Bea!').click(); await page.getByRole('button', { name: 'Report this message' }).click();
-  await page.getByText('Harassment or bullying').click(); await page.getByRole('button', { name: 'Send report' }).click(); await sees('Thank you', 'single message reported'); await page.getByRole('button', { name: 'Done' }).click();
+  await page.getByText('Harassment or bullying').click(); await shot('report-message'); await page.getByRole('button', { name: 'Send report' }).click(); await sees('Thank you', 'single message reported'); await page.getByRole('button', { name: 'Done' }).click();
   await signOut();
   await login('alice@example.test'); await page.goto(`${BASE}/admin/reports`);
   await sees('Reported message, with the messages before it', 'staff see the reported message with its context');
@@ -167,7 +167,7 @@ async function main() {
 
 let code = 0;
 try { await main(); } catch (e) { console.error('\nE2E crashed:', e.message); code = 2; }
-server?.kill();
+if (server) { try { process.kill(-server.pid); } catch { /* already gone */ } }
 if (code === 2) console.log('\n✘ E2E DID NOT COMPLETE');
 else console.log(problems.length ? `\n${problems.length} PROBLEM(S), ${passed} passed:\n - ${problems.join('\n - ')}` : `\n✔ ALL ${passed} E2E CHECKS PASSED`);
 process.exit(code || (problems.length ? 1 : 0));

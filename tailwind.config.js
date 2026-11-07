@@ -1,6 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
+  // Button variants are composed at runtime (`btn-${variant}`), so Tailwind cannot see them in the source.
+  safelist: ['btn-primary', 'btn-secondary', 'btn-quiet', 'btn-danger', 'btn-sm', 'btn-lg'],
   theme: {
     extend: {
       colors: {
