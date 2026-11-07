@@ -29,7 +29,7 @@ export default function PostPage() {
           </div>
         )}
         <CommentSection post={post} onCountChange={() => reload(true)} />
-        {post.author_id && post.author_username && <RequestDialog open={ask} onClose={() => setAsk(false)} recipient={{ id: post.author_id, username: post.author_username }} contextPostId={post.id} prompt={`Hi — your post “${post.title.slice(0, 50)}” really resonated with me…`} />}
+        {post.author_id && post.author_username && <RequestDialog open={ask} onClose={() => setAsk(false)} recipient={{ id: post.author_id, username: post.author_username }} contextPostId={post.id} prompt={`Hi, your post “${post.title.slice(0, 50)}” really resonated with me…`} />}
       </>)}
     </div>
   );

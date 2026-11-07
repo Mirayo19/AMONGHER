@@ -96,7 +96,7 @@ export function createPreviewApi(): Api {
 
   // ------------------------------------------------------------ helpers
   const cur = (): U | null => db.users.find((u) => u.id === db.session) ?? null;
-  const must = (): U => { const u = cur(); if (!u) throw new AppError('not_authenticated', 'Please sign in.'); return u; };
+  const must = (): U => { const u = cur(); if (!u) throw new AppError('not_authenticated', 'Please log in.'); return u; };
   const isActive = (u: U | undefined | null) => !!u && !(u.status === 'suspended' && (!u.until || new Date(u.until) > new Date()));
   const mustActive = () => { const u = must(); if (!isActive(u)) throw new AppError('account_suspended'); return u; };
   const staff = (u: U | null) => !!u && (u.role === 'moderator' || u.role === 'admin');

@@ -89,14 +89,14 @@ export default function Settings() {
           <div className="flex justify-between gap-4"><dt className="text-ink-muted">Age</dt><dd className="font-semibold">18+ self-declared</dd></div>
         </dl>
         <p className="mt-3 text-sm"><Link to="/privacy" className="font-semibold text-plum-700 underline">Privacy policy</Link> · <Link to="/terms" className="font-semibold text-plum-700 underline">Terms</Link></p>
-        <Notice tone="info" className="mt-4">You confirmed you’re 18 or older at sign-up. This is a declaration — AMONGHER does not independently verify age, and doesn’t claim to.</Notice>
+        <Notice tone="info" className="mt-4">You confirmed you’re 18 or older at sign-up. This is a declaration. AMONGHER does not independently verify age, and doesn’t claim to.</Notice>
         <form className="mt-5 flex items-end gap-2" onSubmit={async (e) => { e.preventDefault(); setPwBusy(true); try { await api.updatePassword(pw); setPw(''); toast('Password changed'); } catch (ex) { toast(errorMessage(ex), 'error'); } finally { setPwBusy(false); } }}>
           <div className="flex-1"><Field label="Change password" htmlFor="npw"><Input id="npw" type="password" autoComplete="new-password" minLength={8} value={pw} onChange={(e) => setPw(e.target.value)} placeholder="New password (8+ characters)" /></Field></div>
           <Button type="submit" variant="secondary" loading={pwBusy} disabled={pw.length < 8}>Update</Button>
         </form>
         <div className="mt-6 border-t border-ivory-300 pt-5">
           <p className="text-sm font-semibold">Your data</p>
-          <p className="hint">Download everything AMONGHER holds about you — profile, posts, comments, saved items, settings and your side of your conversations — as a JSON file.</p>
+          <p className="hint">Download everything AMONGHER holds about you: profile, posts, comments, saved items, settings and your side of your conversations, as a JSON file.</p>
           <Button variant="secondary" size="sm" className="mt-3" loading={exporting} onClick={async () => {
             setExporting(true);
             try {
@@ -138,7 +138,7 @@ function Verification({ v, reload }: { v: Awaited<ReturnType<typeof api.getMyVer
         : (<div className="space-y-4">
           {v?.status === 'rejected' && <Notice tone="care" title="Your last request wasn’t approved">{v.reviewer_note ?? 'You’re welcome to apply again with more detail.'}</Notice>}
           <Field label="Tell us about your experience or expertise" htmlFor="vs" hint={<Counter value={statement.length} max={1000} />}><Textarea id="vs" maxLength={1000} value={statement} onChange={(e) => setStatement(e.target.value)} className="min-h-[96px]" placeholder="e.g. I’m a registered midwife with ten years’ experience…" /></Field>
-          <Field label="Supporting document (optional)" htmlFor="vf" hint={isPreviewMode ? 'Files are not stored in preview mode.' : 'JPG, PNG or PDF up to 5 MB. Stored privately — only you and administrators can open it.'}>
+          <Field label="Supporting document (optional)" htmlFor="vf" hint={isPreviewMode ? 'Files are not stored in preview mode.' : 'JPG, PNG or PDF up to 5 MB. Stored privately. Only you and administrators can open it.'}>
             <input id="vf" type="file" accept="image/jpeg,image/png,application/pdf" onChange={(e) => { const f = e.target.files?.[0] ?? null; setFile(f && f.size > 5 * 1024 * 1024 ? (toast('File must be under 5 MB', 'error'), null) : f); }} className="block w-full text-sm text-ink-muted file:mr-3 file:rounded-lg file:border-0 file:bg-plum-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-plum-800" />
           </Field>
           <p className="hint flex items-start gap-1.5"><ShieldCheck size={14} className="mt-0.5 shrink-0" />A person reads every request. This badge is not an identity or age check.</p>

@@ -57,7 +57,7 @@ from (values
  ('things-i-wish-i-knew-before-motherhood','Things I Wish I Knew Before Motherhood','Lessons, honest advice and community insight on pregnancy, birth and the first years.','motherhood',1),
  ('moving-abroad','Moving Abroad: Lessons From Women Who''ve Done It','Practical knowledge on visas, loneliness, money, housing and building a life somewhere new.','lifestyle',2),
  ('your-first-year-in-business','Your First Year in Business','What women learned launching, pricing, hiring and surviving the early months.','career',3),
- ('money-earlier-than-later','Money Lessons, Earlier Than Later','Saving, debt, negotiating and independence — shared plainly.','finance',4),
+ ('money-earlier-than-later','Money Lessons, Earlier Than Later','Saving, debt, negotiating and independence, shared plainly.','finance',4),
  ('walking-into-university','Walking Into University','Study habits, funding and finding your people, from women who''ve been there.','education',5),
  ('understanding-your-health','Understanding Your Health','Advocating for yourself in appointments, and what experience can (and can''t) tell you.','womens-health',6),
  ('staying-safe-staying-sure','Staying Safe, Staying Sure','Experience-based awareness on scams, harassment and trusting your instincts.','safety',7)

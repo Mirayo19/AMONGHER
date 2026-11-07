@@ -23,7 +23,7 @@ export function createSupabaseApi(): Api {
   const check = ({ data, error }: { data: unknown; error: Any }): Any => { if (error) throw toAppError(error); return data; };
   const uidOrThrow = async () => {
     const { data } = await sb.auth.getSession();
-    if (!data.session) throw new AppError('not_authenticated', 'Please sign in again.');
+    if (!data.session) throw new AppError('not_authenticated', 'Please log in again.');
     return data.session.user.id;
   };
   const ignoreDuplicate = (error: Any) => { if (error && error.code !== '23505') throw toAppError(error); };

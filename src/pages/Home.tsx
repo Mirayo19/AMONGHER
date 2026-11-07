@@ -20,11 +20,11 @@ export default function Home() {
 
   const empty = {
     following: <EmptyState icon={<UserPlus size={22} />} title="Nobody followed yet" action={<Link to="/explore" className="btn-primary btn-sm">Explore topics</Link>}>Follow members from their profiles and their posts will appear here. Anonymous posts can’t be followed.</EmptyState>,
-    questions: <EmptyState icon={<Feather size={22} />} title="No questions yet" action={<Link to="/share/ask" className="btn-primary btn-sm">Ask the first question</Link>}>Is there something you’ve been wondering? Ask it — anonymously if you like.</EmptyState>,
+    questions: <EmptyState icon={<Feather size={22} />} title="No questions yet" action={<Link to="/share/ask" className="btn-primary btn-sm">Ask the first question</Link>}>Is there something you’ve been wondering? Ask it, anonymously if you like.</EmptyState>,
   }[filter as 'following' | 'questions'] ?? (
     <EmptyState icon={<Compass size={22} />} title="The conversation starts with you"
       action={<><Link to="/share/experience" className="btn-primary btn-sm">Share an experience</Link><Link to="/explore" className="btn-secondary btn-sm">Explore</Link></>}>
-      Nothing has been shared yet. Be the first to post — what you’ve learned could help someone tonight.
+      Nothing has been shared yet. Be the first to post. What you’ve learned could help someone tonight.
     </EmptyState>
   );
 

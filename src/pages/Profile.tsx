@@ -51,8 +51,8 @@ function ProfileView({ m, onFollow }: { m: Member; onFollow?: (v: boolean) => vo
             </div>)}
         </div>
         <h1 className="relative mt-4 flex items-center gap-1.5 text-2xl font-semibold">@{m.username}{m.verified_contributor && <VerifiedBadge />}</h1>
-        {m.verified_contributor && <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-brass-700"><BadgeCheck size={14} />Verified contributor — reviewed by the AMONGHER team</p>}
-        {m.bio ? <p className="prose-body mt-3">{m.bio}</p> : isMe ? <p className="mt-3 text-sm text-ink-muted">Add a short bio in <Link to="/settings" className="font-semibold text-plum-700 underline">Settings</Link> — it’s optional.</p> : null}
+        {m.verified_contributor && <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-brass-700"><BadgeCheck size={14} />Verified contributor, reviewed by the AMONGHER team</p>}
+        {m.bio ? <p className="prose-body mt-3">{m.bio}</p> : isMe ? <p className="mt-3 text-sm text-ink-muted">Add a short bio in <Link to="/settings" className="font-semibold text-plum-700 underline">Settings</Link>. It’s optional.</p> : null}
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-ink-muted">
           {m.location && <span className="flex items-center gap-1"><MapPin size={14} />{m.location}</span>}
           {m.created_at && <span className="flex items-center gap-1"><Calendar size={14} />Joined {new Date(m.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</span>}
@@ -63,7 +63,7 @@ function ProfileView({ m, onFollow }: { m: Member; onFollow?: (v: boolean) => vo
       </section>
 
       <div className="my-5">{isMe ? <Tabs value={tab} onChange={setTab} items={[{ id: 'posts', label: 'My posts' }, { id: 'saved', label: 'Saved experiences' }]} /> : <h2 className="text-xl font-semibold">Posts</h2>}</div>
-      {isMe && tab === 'posts' && <Notice tone="info" className="mb-4">This list includes your anonymous posts — only you (and moderators, if reported) can tell they’re yours.</Notice>}
+      {isMe && tab === 'posts' && <Notice tone="info" className="mb-4">This list includes your anonymous posts. Only you (and moderators, if reported) can tell they’re yours.</Notice>}
       {isMe && tab === 'saved'
         ? <PostList query={{ bookmarked: true }} empty={<EmptyState title="Nothing saved yet">Tap the bookmark on any post to keep it here.</EmptyState>} />
         : <PostList query={isMe ? { mine: true } : { authorId: m.id }} empty={<EmptyState title={isMe ? 'You haven’t posted yet' : 'No public posts'} action={isMe ? <Link to="/share" className="btn-primary btn-sm">Share something</Link> : undefined}>{isMe ? 'Your first post could help someone.' : 'Anonymous posts are never attributed to a profile.'}</EmptyState>} />}

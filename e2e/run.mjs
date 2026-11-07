@@ -50,7 +50,7 @@ async function main() {
   }
   async function login(email, wait = '**/home') {
     await page.goto(`${BASE}/login`); await page.fill('#email', email); await page.fill('#pw', PW);
-    await page.getByRole('button', { name: 'Sign in', exact: true }).click(); await page.waitForURL(wait);
+    await page.getByRole('button', { name: 'Login', exact: true }).click(); await page.waitForURL(wait);
   }
   async function onboard() {
     await page.getByRole('button', { name: /^Continue/ }).click();

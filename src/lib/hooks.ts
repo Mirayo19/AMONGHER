@@ -28,5 +28,5 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[] = []) {
 }
 
 export function useTitle(title: string) {
-  useEffect(() => { document.title = title ? `${title} · AMONGHER` : 'AMONGHER — Learn from her. Share with her.'; }, [title]);
+  useEffect(() => { document.title = title ? `${title} · AMONGHER` : 'AMONGHER · Learn from her. Share with her.'; }, [title]);
 }

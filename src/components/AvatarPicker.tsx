@@ -29,7 +29,7 @@ export default function AvatarPicker({ motif, tone, onChange }: { motif: AvatarM
             ))}
           </div>
         </div>
-        <p className="hint">Avatars are generated shapes — you never need to upload a photo.</p>
+        <p className="hint">Avatars are generated shapes, so you never need to upload a photo.</p>
       </div>
     </div>
   );

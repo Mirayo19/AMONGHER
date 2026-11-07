@@ -44,8 +44,8 @@ export function Byline({ post }: { post: Post }) {
 export function StatusBanner({ post }: { post: Post }) {
   if (post.status === 'published') return null;
   const text = {
-    under_review: 'Under review — hidden from other members until a moderator checks it.',
-    hidden: 'Hidden by a moderator — only you and staff can see this.',
+    under_review: 'Under review. Hidden from other members until a moderator checks it.',
+    hidden: 'Hidden by a moderator. Only you and staff can see this.',
     removed: 'Removed by a moderator for breaking the community guidelines.',
   }[post.status];
   return <div className="mb-3 flex items-center gap-2 rounded-lg bg-clay-100 px-3 py-2 text-xs font-semibold text-clay-700"><EyeOff size={14} />{text}</div>;
@@ -67,7 +67,7 @@ function EditPostSheet({ post, onClose, onSaved }: { post: Post; onClose: () => 
         <Field label="Your story" htmlFor="eb" hint={<Counter value={body.length} max={5000} />}><Textarea id="eb" maxLength={5000} value={body} onChange={(e) => setBody(e.target.value)} className="min-h-[200px]" /></Field>
         {(post.allow_curation || post.comment_count > 0) && (
           <Notice tone="care" title="Before you save">
-            {post.comment_count > 0 && 'Replies were written to what you originally said — consider adding a note rather than rewriting. '}
+            {post.comment_count > 0 && 'Replies were written to what you originally said, so consider adding a note rather than rewriting. '}
             {post.allow_curation && 'If editors featured this in a Library collection, it will be removed from it until they review the new version.'}
           </Notice>)}
       </div>

@@ -88,7 +88,7 @@ export function CategoryPill({ cat, className }: { cat?: Category | null; classN
     </span>
   );
 }
-export function VerifiedBadge({ title = 'Verified contributor — reviewed by the AMONGHER team' }: { title?: string }) {
+export function VerifiedBadge({ title = 'Verified contributor, reviewed by the AMONGHER team' }: { title?: string }) {
   return <span title={title} className="inline-flex text-brass-500"><BadgeCheck size={15} aria-label={title} /></span>;
 }
 

@@ -11,7 +11,7 @@ export function SafetyNotice({ crisis, compact }: { crisis?: boolean; compact?: 
   return (
     <Notice tone={crisis ? 'danger' : 'care'} title={crisis ? 'If you might act on thoughts of harming yourself' : 'A gentle note on sensitive topics'}>
       {crisis ? (
-        <>Please contact your local emergency number or a crisis line right now — you don’t have to carry this alone.{' '}
+        <>Please contact your local emergency number or a crisis line right now. You don’t have to carry this alone.{' '}
           <a className="font-semibold underline" href="https://findahelpline.com" target="_blank" rel="noopener noreferrer">Find a free helpline in your country <ExternalLink size={12} className="inline" /></a></>
       ) : (
         <>
@@ -27,7 +27,7 @@ export function SafetyNotice({ crisis, compact }: { crisis?: boolean; compact?: 
 export const REPORT_REASONS: { id: ReportReason; label: string; hint: string }[] = [
   { id: 'harassment', label: 'Harassment or bullying', hint: 'Targeting, shaming or repeated unwanted contact' },
   { id: 'abuse_or_threats', label: 'Threats or abuse', hint: 'Violence, intimidation or coercion' },
-  { id: 'self_harm', label: 'Self-harm or someone at risk', hint: 'Someone may be in danger — we prioritise these' },
+  { id: 'self_harm', label: 'Self-harm or someone at risk', hint: 'Someone may be in danger. We prioritise these' },
   { id: 'unsafe_advice', label: 'Unsafe or harmful advice', hint: 'Health or safety guidance that could hurt someone' },
   { id: 'privacy', label: 'Shares private information', hint: 'Names, contact details, photos or identifying details' },
   { id: 'hate', label: 'Hate or discrimination', hint: '' },
@@ -59,7 +59,7 @@ export function ReportDialog({ open, onClose, type, targetId, label }: { open: b
       : <><Button variant="quiet" onClick={close}>Cancel</Button><Button loading={busy} disabled={!reason} onClick={submit}>Send report</Button></>}>
       {done ? (
         <div className="space-y-3 text-[15px] leading-relaxed text-ink-soft">
-          <p className="font-semibold text-plum-900">Thank you — this helps keep AMONGHER safe.</p>
+          <p className="font-semibold text-plum-900">Thank you. This helps keep AMONGHER safe.</p>
           <p>A moderator will review your report. They won’t tell the other person who reported them. If you’d rather not see this member again, you can also block them from their profile or the menu.</p>
           {reason === 'self_harm' && <SafetyNotice crisis />}
         </div>

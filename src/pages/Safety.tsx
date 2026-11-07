@@ -12,7 +12,7 @@ import { BrandLink, Button, Counter, Field, Notice, PageHeader, Textarea } from 
 const GUIDELINES = [
   ['Be kind, be curious', 'Respond to the person, not just the problem. Assume she’s doing her best.'],
   ['Share your experience, not a diagnosis', 'Say what happened to you. Don’t present personal stories as medical, legal or financial advice.'],
-  ['Protect privacy — yours and others’', 'No real names, workplaces, phone numbers, addresses or photos of other people. Never “out” anyone.'],
+  ['Protect privacy, yours and others’', 'No real names, workplaces, phone numbers, addresses or photos of other people. Never “out” anyone.'],
   ['No harassment, shaming or hate', 'Disagree respectfully. Bullying, threats and discrimination lead to removal.'],
   ['This is a space for women', 'Please don’t join to observe, recruit, sell or pressure. Solicitation and spam are removed.'],
   ['Handle heavy topics with care', 'Health, abuse and safety posts carry a content note. Reply supportively and point to professional help where it’s needed.'],
@@ -35,10 +35,10 @@ export default function Safety() {
       <section className="space-y-6" aria-label="How AMONGHER protects you">
         <h2 className="text-2xl font-semibold">How we try to keep you safe</h2>
         <Row icon={EyeOff} title="Anonymous-first, honestly">You can post without your username showing. Your email and any private details are never displayed to members. Moderators can see which account is behind an anonymous post if it’s reported, so we can act on abuse.</Row>
-        <Row icon={Lock} title="Private messages — with a caveat">Conversations start only when someone accepts a request. They’re protected by strict database access rules, but they are <strong>not end-to-end encrypted</strong>. Moderators read a conversation only when a participant reports it.</Row>
+        <Row icon={Lock} title="Private messages, with a caveat">Conversations start only when someone accepts a request. They’re protected by strict database access rules, but they are <strong>not end-to-end encrypted</strong>. Moderators read a conversation only when a participant reports it.</Row>
         <Row icon={UserRound} title="About age">You confirm you’re 18+ when you join. That is a self-declaration. We don’t currently verify age, and we won’t claim otherwise.</Row>
         <Row icon={Flag} title="Reporting and review">Report any post, comment, member or conversation. When three different members report the same post or comment, it’s hidden from others until a moderator reviews it. Reporters are never named to the person they report.</Row>
-        <Row icon={Gavel} title="Suspensions and appeals">Moderators can hide or remove content; administrators can suspend accounts. A suspended member sees why and can appeal — an administrator reviews every appeal.</Row>
+        <Row icon={Gavel} title="Suspensions and appeals">Moderators can hide or remove content; administrators can suspend accounts. A suspended member sees why and can appeal. An administrator reviews every appeal.</Row>
         <Row icon={HeartHandshake} title="Extra care for sensitive topics">Health, motherhood, safety and abuse-related posts carry a content note, default to anonymous, and are queued for moderator review. Sensitive posts can’t be featured in the Library until a moderator has approved them.</Row>
         <Row icon={ShieldCheck} title="You’re in control">Block anyone in one tap. Switch off message requests. Turn discoverability off. Delete your account and your data at any time from Settings.</Row>
       </section>

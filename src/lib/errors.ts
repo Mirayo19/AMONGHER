@@ -2,9 +2,9 @@
 const MESSAGES: Record<string, string> = {
   not_accepting: "This member isn't accepting message requests right now.",
   already_connected: 'You already have a conversation with her.',
-  request_pending: 'There is already a pending request between you two — check your Requests tab.',
+  request_pending: 'There is already a pending request between you two. Check your Requests tab.',
   recently_declined: "She didn't accept your last request. You can try again after 30 days.",
-  rate_limited: "You're doing that a lot — please wait a little while and try again.",
+  rate_limited: "You're doing that a lot. Please wait a little while and try again.",
   account_suspended: 'Your account is currently suspended.',
   invalid_recipient: "You can't do that with your own account.",
   cannot_report_self: "You can't report your own content.",
@@ -20,7 +20,7 @@ const MESSAGES: Record<string, string> = {
   cannot_modify_self: "You can't change your own role or status.",
   cannot_modify_admin: "Administrators can't be suspended here.",
   'Invalid login credentials': 'Email or password is incorrect.',
-  'Email not confirmed': 'Please confirm your email first — check your inbox.',
+  'Email not confirmed': 'Please confirm your email first. Check your inbox.',
   'User already registered': 'An account with this email already exists. Try signing in.',
 };
 

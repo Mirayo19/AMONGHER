@@ -27,7 +27,7 @@ export default function Understand() {
   if (situation) return <Results situationId={situation.id} label={situation.label} onBack={() => setSel(null)} />;
   return (
     <div>
-      <PageHeader eyebrow="Connection" title="Find someone who understands" subtitle="Choose what describes you right now. We’ll show you experiences — and the women who’ve chosen to share theirs." />
+      <PageHeader eyebrow="Connection" title="Find someone who understands" subtitle="Choose what describes you right now. We’ll show you experiences and the women who’ve chosen to share theirs." />
       <div className="space-y-6">
         {grouped.map(([name, list]) => (
           <section key={name}><h2 className="eyebrow mb-2.5 text-ink-muted">{name}</h2>
@@ -53,7 +53,7 @@ function Results({ situationId, label, onBack }: { situationId: string; label: s
       <PageHeader eyebrow="You said" title={<span className="italic">“{label}”</span>} />
       <section className="mb-10">
         <h2 className="mb-1 text-xl font-semibold">Women who’ve opted in to share</h2>
-        <p className="mb-4 text-sm text-ink-muted">Each of these members chose to be discoverable for this situation. Requesting a chat is not a promise — she decides.</p>
+        <p className="mb-4 text-sm text-ink-muted">Each of these members chose to be discoverable for this situation. Requesting a chat is not a promise. She decides.</p>
         {loading ? <Spinner label="Looking" /> : error ? <Notice tone="danger">{error}</Notice> : people?.length ? (
           <ul className="space-y-3">{people.map((p) => (
             <li key={p.user_id} className="card p-4">
@@ -67,13 +67,13 @@ function Results({ situationId, label, onBack }: { situationId: string; label: s
               </div>
               <Button size="sm" variant="secondary" className="mt-3 w-full" onClick={() => setTarget(p)}><MessageSquarePlus size={16} />Request a private conversation</Button>
             </li>))}</ul>
-        ) : <EmptyState icon={<HeartHandshake size={22} />} title="No one has opted in yet">Members only appear here if they’ve chosen to be found. Meanwhile, the experiences below may help — or ask the community.</EmptyState>}
+        ) : <EmptyState icon={<HeartHandshake size={22} />} title="No one has opted in yet">Members only appear here if they’ve chosen to be found. Meanwhile, the experiences below may help, or ask the community.</EmptyState>}
       </section>
       <section>
         <h2 className="mb-3 text-xl font-semibold">Experiences from the community</h2>
         <PostList query={{ situationId }} empty={<EmptyState title="No tagged experiences yet" action={<Link to={`/share/ask?situation=${situationId}`} className="btn-primary btn-sm">Ask about this</Link>}>Share what you’ve learned, or ask a question and tag this situation.</EmptyState>} />
       </section>
-      {target && <RequestDialog open onClose={() => setTarget(null)} recipient={{ id: target.user_id, username: target.username }} contextSituationId={situationId} prompt={`Hi — I’m ${label.replace(/^I'm /, '').replace(/^I’m /, '')}. I saw you’ve been through something similar and would really value hearing how it went for you…`} />}
+      {target && <RequestDialog open onClose={() => setTarget(null)} recipient={{ id: target.user_id, username: target.username }} contextSituationId={situationId} prompt={`Hi, I’m ${label.replace(/^I'm /, '').replace(/^I’m /, '')}. I saw you’ve been through something similar and would really value hearing how it went for you…`} />}
     </div>
   );
 }
@@ -104,8 +104,8 @@ function Visibility() {
               <button key={s.id} type="button" aria-pressed={picked.includes(s.id)} onClick={() => setPicked((p) => p.includes(s.id) ? p.filter((x) => x !== s.id) : [...p, s.id])}
                 className={cx('rounded-full border px-3 py-1.5 text-left text-[13px] font-semibold', picked.includes(s.id) ? 'border-plum-700 bg-plum-700 text-ivory-50' : 'border-ivory-400 bg-ivory-50 text-ink-soft')}>{s.label.replace(/^I[’']m /, '')}</button>))}</div>
           </div>
-          <div><label className="label" htmlFor="dn">A short note (optional)</label><Textarea id="dn" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} className="min-h-[72px]" placeholder="e.g. Moved abroad in 2023 — happy to share what I learned." /><div className="mt-1 text-right"><Counter value={note.length} max={200} /></div></div>
-          <div className="rounded-2xl bg-ivory-50 px-4"><Switch checked={on} onChange={(v) => save(v)} label="Let members find me" description="Others see your username, avatar, note and (if your profile is public) bio — never your email or location." disabled={!picked.length && !on} /></div>
+          <div><label className="label" htmlFor="dn">A short note (optional)</label><Textarea id="dn" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} className="min-h-[72px]" placeholder="e.g. Moved abroad in 2023. Happy to share what I learned." /><div className="mt-1 text-right"><Counter value={note.length} max={200} /></div></div>
+          <div className="rounded-2xl bg-ivory-50 px-4"><Switch checked={on} onChange={(v) => save(v)} label="Let members find me" description="Others see your username, avatar, note and (if your profile is public) bio. They never see your email or location." disabled={!picked.length && !on} /></div>
           {on && <Button variant="secondary" size="sm" onClick={() => save(true)}>Save changes</Button>}
           <p className="hint flex items-center gap-1.5"><EyeOff size={13} />Anyone can still decline or ignore requests, and you can switch this off at any time. You can also stop accepting requests entirely in Settings.</p>
           {me.settings.dm_permission === 'nobody' && <Notice tone="care">Your message requests are currently switched off, so you won’t be listed. Change this in Settings.</Notice>}

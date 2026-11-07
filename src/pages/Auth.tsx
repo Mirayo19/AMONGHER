@@ -43,7 +43,7 @@ function PasswordField({ id, label = 'Password', value, onChange, autoComplete, 
 
 /* ---------------------------------------------------------------- Login */
 export function Login() {
-  useTitle('Sign in');
+  useTitle('Login');
   const nav = useNavigate(); const loc = useLocation(); const [sp] = useSearchParams();
   const [email, setEmail] = useState((loc.state as { email?: string } | null)?.email ?? '');
   const [password, setPassword] = useState('');
@@ -57,14 +57,14 @@ export function Login() {
     } finally { setBusy(false); }
   };
   return (
-    <AuthLayout title="Welcome back" subtitle="Sign in to pick up where you left off."
+    <AuthLayout title="Welcome back" subtitle="Log in to pick up where you left off."
       footer={<>New to AMONGHER? <Link to="/signup" className="font-semibold text-plum-700 hover:underline">Create an account</Link></>}>
-      {sp.get('confirmed') && <Notice tone="ok" className="mb-5">Email confirmed — you can sign in now.</Notice>}
+      {sp.get('confirmed') && <Notice tone="ok" className="mb-5">Email confirmed. You can log in now.</Notice>}
       <form onSubmit={submit} className="space-y-4" noValidate={false}>
         <Field label="Email" htmlFor="email"><Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" /></Field>
         <PasswordField id="pw" value={password} onChange={setPassword} autoComplete="current-password" />
         {err && <p role="alert" className="text-sm font-medium text-clay-700">{err}</p>}
-        <Button type="submit" size="lg" className="w-full" loading={busy}>Sign in</Button>
+        <Button type="submit" size="lg" className="w-full" loading={busy}>Login</Button>
         <p className="text-center"><Link to="/forgot" className="text-sm font-semibold text-plum-700 hover:underline">Forgot your password?</Link></p>
       </form>
     </AuthLayout>
@@ -102,8 +102,8 @@ export function SignUp() {
   const uMsg = { idle: null, checking: null, ok: null, taken: 'That username is taken or reserved.', invalid: 'Use 3–24 lowercase letters, numbers or underscores.' }[uStatus];
 
   return (
-    <AuthLayout title="Join AMONGHER" subtitle="No real name. No photo. Just a username and your story."
-      footer={<>Already a member? <Link to="/login" className="font-semibold text-plum-700 hover:underline">Sign in</Link></>}>
+    <AuthLayout title="Sign up to AMONGHER" subtitle="No real name. No photo. Just a username and your story."
+      footer={<>Already a member? <Link to="/login" className="font-semibold text-plum-700 hover:underline">Login</Link></>}>
       <form onSubmit={submit} className="space-y-4">
         <Field label="Choose a username" htmlFor="username" error={uMsg}
           hint={uStatus === 'ok' ? <span className="font-semibold text-sage-700">@{username.toLowerCase()} is available</span> : 'This is how others will know you. Keep it free of your real name.'}>
@@ -112,13 +112,13 @@ export function SignUp() {
             <Input id="username" value={username} onChange={(e) => setUsername(e.target.value.replace(/\s/g, ''))} className="pl-8" autoComplete="off" autoCapitalize="none" spellCheck={false} maxLength={24} required />
           </div>
         </Field>
-        <Field label="Email" htmlFor="email" hint="Used only to sign in and recover your account. It is never shown to anyone.">
+        <Field label="Email" htmlFor="email" hint="Used only to log in and recover your account. It is never shown to anyone.">
           <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
         </Field>
         <PasswordField id="pw" value={password} onChange={setPassword} autoComplete="new-password" hint="At least 8 characters." />
         <div className="space-y-2.5 pt-1">
           <Checkbox checked={age} onChange={setAge} error={tried && !age}>
-            <strong className="text-ink">I am 18 or older.</strong> I understand this is a self-declaration — AMONGHER does not independently verify age.
+            <strong className="text-ink">I am 18 or older.</strong> I understand this is a self-declaration. AMONGHER does not independently verify age.
           </Checkbox>
           <Checkbox checked={guidelines} onChange={setGuidelines} error={tried && !guidelines}>
             I’ve read the <Link to="/safety#guidelines" target="_blank" className="font-semibold text-plum-700 underline">Community Guidelines</Link>, <Link to="/terms" target="_blank" className="font-semibold text-plum-700 underline">Terms</Link> and <Link to="/privacy" target="_blank" className="font-semibold text-plum-700 underline">Privacy policy</Link>. AMONGHER is a space for women, and I’ll treat it that way.
@@ -142,14 +142,14 @@ export function VerifyEmail() {
   const nav = useNavigate();
   return (
     <AuthLayout title="Check your inbox"
-      subtitle={<>We sent a confirmation link{email && <> to <strong className="text-ink">{email}</strong></>}. Open it to activate your account, then sign in.</>}>
-      <div className="card flex items-center gap-4 p-5"><MailCheck className="shrink-0 text-plum-600" size={32} strokeWidth={1.6} /><p className="text-sm leading-relaxed text-ink-muted">Can’t see it? Check spam or promotions. The link keeps your account yours — nobody else can use your username without it.</p></div>
+      subtitle={<>We sent a confirmation link{email && <> to <strong className="text-ink">{email}</strong></>}. Open it to activate your account, then log in.</>}>
+      <div className="card flex items-center gap-4 p-5"><MailCheck className="shrink-0 text-plum-600" size={32} strokeWidth={1.6} /><p className="text-sm leading-relaxed text-ink-muted">Can’t see it? Check spam or promotions. The link keeps your account yours. Nobody else can use your username without it.</p></div>
       <div className="mt-5 space-y-3">
         <Button variant="secondary" className="w-full" disabled={!email || cool > 0} loading={busy}
           onClick={async () => { setBusy(true); try { await api.resendVerification(email); toast('Confirmation email sent again'); setCool(45); } catch (e) { toast(errorMessage(e), 'error'); } finally { setBusy(false); } }}>
           {cool > 0 ? `Resend in ${cool}s` : 'Resend email'}
         </Button>
-        <Link to="/login" state={{ email }} className="btn-quiet w-full">Back to sign in</Link>
+        <Link to="/login" state={{ email }} className="btn-quiet w-full">Back to login</Link>
       </div>
       {api.previewConfirmEmail && email && (
         <Notice tone="care" title="Preview mode" className="mt-6">
@@ -172,7 +172,7 @@ export function Forgot() {
   };
   return (
     <AuthLayout title="Forgot your password?" subtitle="Enter your email and we’ll send a link to choose a new one."
-      footer={<Link to="/login" className="font-semibold text-plum-700 hover:underline">Back to sign in</Link>}>
+      footer={<Link to="/login" className="font-semibold text-plum-700 hover:underline">Back to login</Link>}>
       {sent ? (
         <div className="space-y-4">
           <Notice tone="ok" title="If an account exists for that email, a reset link is on its way.">For your privacy we don’t say whether an address is registered.</Notice>

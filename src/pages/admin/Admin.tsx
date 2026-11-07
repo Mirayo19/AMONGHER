@@ -88,7 +88,7 @@ function TargetPreview({ r }: { r: Report }) {
   const d = t.data ?? {};
   if ('post' in d) return d.post ? <div className="rounded-xl bg-plum-50/70 p-3.5 text-sm"><p className="font-semibold">{d.post.title}</p><p className="prose-body mt-1 line-clamp-6 text-[13.5px]">{d.post.body}</p><p className="mt-2 text-xs text-ink-muted">Status: <b>{d.post.status}</b> · by {d.post.author_username ? `@${d.post.author_username}` : 'unknown'}{d.post.is_anonymous && ' (anonymous to members)'}</p></div> : <p className="text-sm text-ink-muted">Post no longer exists.</p>;
   if ('comment' in d) return d.comment ? <div className="rounded-xl bg-plum-50/70 p-3.5 text-sm"><p className="prose-body text-[13.5px]">{d.comment.body}</p><p className="mt-2 text-xs text-ink-muted">Status: <b>{d.comment.status}</b> · by {d.comment.author_username ? `@${d.comment.author_username}` : 'unknown'}</p></div> : <p className="text-sm text-ink-muted">Comment no longer exists.</p>;
-  if ('member' in d) return d.member ? <p className="rounded-xl bg-plum-50/70 p-3.5 text-sm">Member <b>@{d.member.username}</b>{d.member.bio && <> — {d.member.bio}</>}</p> : <p className="text-sm text-ink-muted">Member no longer exists.</p>;
+  if ('member' in d) return d.member ? <p className="rounded-xl bg-plum-50/70 p-3.5 text-sm">Member <b>@{d.member.username}</b>{d.member.bio && <>: {d.member.bio}</>}</p> : <p className="text-sm text-ink-muted">Member no longer exists.</p>;
   const ev = (r.evidence as { from_reporter: boolean; body: string; at: string; reported?: boolean }[] | null) ?? [];
   return <div className="space-y-1 rounded-xl bg-plum-50/70 p-3.5 text-[13px]"><p className="mb-1 text-xs font-bold uppercase tracking-wide text-ink-muted">{r.target_type === 'message' ? 'Reported message, with the messages before it' : 'Messages attached by the reporter'}</p>{ev.length ? ev.map((m, i) => <p key={i} className={cx(m.reported && 'rounded-md bg-clay-100 px-1.5 py-1 font-semibold text-clay-700')}><b>{m.from_reporter ? 'Reporter' : 'Reported'}:</b> {m.body}</p>) : <p className="text-ink-muted">No messages.</p>}</div>;
 }
@@ -131,7 +131,7 @@ export function AdminReports() {
                 {r.target_type !== 'post' && r.target_type !== 'comment' && <Button size="sm" variant="secondary" onClick={() => setAct({ r, resolution: 'actioned', content: null })}>Mark actioned</Button>}
                 {me?.role === 'admin' && r.reported_user_id && <Button size="sm" variant="danger" onClick={() => setSuspend(r)}><Ban size={15} />Suspend member</Button>}
               </div>
-            ) : <p className="mt-3 text-xs text-ink-muted"><b className="capitalize">{r.status}</b>{r.resolution_note && <> — {r.resolution_note}</>}</p>}
+            ) : <p className="mt-3 text-xs text-ink-muted"><b className="capitalize">{r.status}</b>{r.resolution_note && <>: {r.resolution_note}</>}</p>}
           </li>))}</ul>)}
       <Sheet open={!!act} onClose={() => setAct(null)} title={act?.resolution === 'dismissed' ? 'Dismiss report' : act?.content ? `${act.content === 'hidden' ? 'Hide' : 'Remove'} content` : 'Mark as actioned'}
         footer={<><Button variant="quiet" onClick={() => setAct(null)}>Cancel</Button><Button onClick={doResolve} variant={act?.content === 'removed' ? 'danger' : 'primary'}>Confirm</Button></>}>
@@ -198,12 +198,12 @@ export function AdminContent() {
           {tab === 'posts' && <div className="relative flex-1"><Search size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint" /><input className="input pl-10" placeholder="Search posts…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search posts" /></div>}
           <Select value={status} onChange={(e) => setStatus(e.target.value as ContentStatus | 'any')} className="w-44" aria-label="Status"><option value="any">Any status</option><option value="published">Published</option><option value="under_review">Under review</option><option value="hidden">Hidden</option><option value="removed">Removed</option></Select>
         </div>)}
-      {tab === 'attention' && <Notice tone="care" className="mb-4" title="Review queue">Auto-hidden items (three member reports) and sensitive posts. “Approve” marks a sensitive post as reviewed — required before it can be featured in the Library.</Notice>}
+      {tab === 'attention' && <Notice tone="care" className="mb-4" title="Review queue">Auto-hidden items (three member reports) and sensitive posts. “Approve” marks a sensitive post as reviewed, which is required before it can be featured in the Library.</Notice>}
       {(tab === 'comments' ? comments.loading : posts.loading) ? <SkeletonCards n={2} /> : tab === 'comments' ? (
-        comments.data?.length ? <ul className="space-y-3">{comments.data.map((c) => <li key={c.id} className="card p-4"><p className="prose-body text-[14px]">{c.body}</p><p className="mt-2 text-xs text-ink-muted">{c.author_username ? `@${c.author_username}` : '—'} · {timeAgo(c.created_at)} · <b>{c.status}</b></p><Actions type="comment" id={c.id} st={c.status} /></li>)}</ul> : <EmptyState title="No comments">Nothing matches.</EmptyState>
+        comments.data?.length ? <ul className="space-y-3">{comments.data.map((c) => <li key={c.id} className="card p-4"><p className="prose-body text-[14px]">{c.body}</p><p className="mt-2 text-xs text-ink-muted">{c.author_username ? `@${c.author_username}` : 'unknown'} · {timeAgo(c.created_at)} · <b>{c.status}</b></p><Actions type="comment" id={c.id} st={c.status} /></li>)}</ul> : <EmptyState title="No comments">Nothing matches.</EmptyState>
       ) : posts.data?.length ? <ul className="space-y-3">{posts.data.map((p) => (
         <li key={p.id} className="card p-4">
-          <div className="flex flex-wrap items-center gap-2 text-xs"><span className="rounded-full bg-plum-100 px-2 py-0.5 font-bold text-plum-800">{p.kind}</span><b className="uppercase tracking-wide text-ink-muted">{p.status.replace('_', ' ')}</b>{p.sensitive && <span className="flex items-center gap-1 font-bold text-brass-700"><ShieldAlert size={12} />sensitive</span>}<span className="ml-auto text-ink-muted">{p.author_username ? `@${p.author_username}` : '—'}{p.is_anonymous && ' (anon)'} · {timeAgo(p.created_at)}</span></div>
+          <div className="flex flex-wrap items-center gap-2 text-xs"><span className="rounded-full bg-plum-100 px-2 py-0.5 font-bold text-plum-800">{p.kind}</span><b className="uppercase tracking-wide text-ink-muted">{p.status.replace('_', ' ')}</b>{p.sensitive && <span className="flex items-center gap-1 font-bold text-brass-700"><ShieldAlert size={12} />sensitive</span>}<span className="ml-auto text-ink-muted">{p.author_username ? `@${p.author_username}` : 'unknown'}{p.is_anonymous && ' (anon)'} · {timeAgo(p.created_at)}</span></div>
           <Link to={`/post/${p.id}`} className="mt-2 block font-semibold hover:text-plum-700">{p.title}</Link><p className="prose-body mt-1 line-clamp-3 text-[13.5px]">{p.body}</p><Actions type="post" id={p.id} st={p.status} />
         </li>))}</ul> : <EmptyState icon={<CheckCircle2 size={22} />} title="All clear">Nothing needs attention.</EmptyState>}
     </div>
@@ -222,7 +222,7 @@ function SuspendSheet({ userId, name, onClose }: { userId: string; name: string;
       <div className="space-y-4">
         <Field label="Reason (shown to the member)" htmlFor="sr"><Textarea id="sr" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300} placeholder="e.g. Repeated harassment in replies" className="min-h-[88px]" /></Field>
         <Field label="Duration" htmlFor="sd"><Select id="sd" value={days} onChange={(e) => setDays(e.target.value)}><option value="1">1 day</option><option value="7">7 days</option><option value="30">30 days</option><option value="indef">Until an administrator reviews</option></Select></Field>
-        <p className="hint">The member can still sign in to read the reason and submit an appeal.</p>
+        <p className="hint">The member can still log in to read the reason and submit an appeal.</p>
       </div>
     </Sheet>
   );
@@ -420,7 +420,7 @@ export function AdminAppeals() {
       <div className="flex items-center justify-between"><p className="font-semibold">@{a.username ?? 'deleted member'}</p><span className="text-xs text-ink-muted">{fullDate(a.created_at)}</span></div>
       <p className="prose-body mt-2 text-[14px]">{a.message}</p>
       {a.status === 'pending' ? <Decision labels={['Reinstate account', 'Uphold suspension']} onDecide={async (ok, note) => { try { await api.adminResolveAppeal(a.id, ok ? 'granted' : 'denied', note); toast(ok ? 'Account reinstated' : 'Suspension upheld'); void reload(true); } catch (e) { toast(errorMessage(e), 'error'); } }} />
-        : <p className="mt-2 text-xs text-ink-muted"><b className="capitalize">{a.status}</b>{a.admin_note && ` — ${a.admin_note}`}</p>}
+        : <p className="mt-2 text-xs text-ink-muted"><b className="capitalize">{a.status}</b>{a.admin_note && `: ${a.admin_note}`}</p>}
     </li>))}</ul>;
 }
 

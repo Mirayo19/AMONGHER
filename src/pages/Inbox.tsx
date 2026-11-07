@@ -58,7 +58,7 @@ function Requests({ incoming, loading, error, reload }: { incoming: MessageReque
   const nav = useNavigate(); const toast = useToast(); const [busy, setBusy] = useState<string | null>(null);
   const respond = async (r: MessageRequest, accept: boolean) => {
     setBusy(r.id);
-    try { const id = await api.respondToRequest(r.id, accept); if (accept && id) { toast('Request accepted'); nav(`/inbox/${id}`); } else { toast('Request declined — she won’t be told more than that'); reload(); } }
+    try { const id = await api.respondToRequest(r.id, accept); if (accept && id) { toast('Request accepted'); nav(`/inbox/${id}`); } else { toast('Request declined. She won’t be told more than that'); reload(); } }
     catch (e) { toast(errorMessage(e), 'error'); reload(); } finally { setBusy(null); }
   };
   return (
@@ -141,7 +141,7 @@ export function Conversation() {
         <Link to={`/u/${c.other_username}`} className="min-w-0 flex-1 truncate font-semibold hover:underline">@{c.other_username}</Link>
         <Menu trigger={<MoreHorizontal size={20} />}>
           {(close) => (<>
-            <MenuItem icon={c.muted ? <Bell size={17} /> : <BellOff size={17} />} onClick={async () => { close(); await api.setMuted(id, !c.muted); toast(c.muted ? 'Notifications on for this chat' : 'Muted — no unread badge for this chat'); void conv.reload(true); }}>{c.muted ? 'Unmute notifications' : 'Mute notifications'}</MenuItem>
+            <MenuItem icon={c.muted ? <Bell size={17} /> : <BellOff size={17} />} onClick={async () => { close(); await api.setMuted(id, !c.muted); toast(c.muted ? 'Notifications on for this chat' : 'Muted. No unread badge for this chat'); void conv.reload(true); }}>{c.muted ? 'Unmute notifications' : 'Mute notifications'}</MenuItem>
             <MenuItem icon={<Flag size={17} />} onClick={() => { close(); setDlg('report'); }}>Report conversation</MenuItem>
             <MenuItem danger icon={<Ban size={17} />} onClick={() => { close(); setDlg('block'); }}>{c.blocked ? 'Unblock' : 'Block'} @{c.other_username}</MenuItem>
             <MenuItem danger icon={<Trash2 size={17} />} onClick={() => { close(); setDlg('delete'); }}>Delete conversation</MenuItem>
@@ -151,7 +151,7 @@ export function Conversation() {
 
       <p className="mx-auto mb-4 flex max-w-xs items-center justify-center gap-1.5 text-center text-[11.5px] leading-snug text-ink-muted"><Lock size={12} className="shrink-0" />Private between you two. Not end-to-end encrypted.</p>
       <div className="flex-1 space-y-1.5 pb-4" aria-live="polite">
-        {msgs === null ? <SkeletonCards n={2} /> : msgs.length === 0 && <p className="py-10 text-center text-sm text-ink-muted">Say hello — she accepted your request, so she’d like to hear from you.</p>}
+        {msgs === null ? <SkeletonCards n={2} /> : msgs.length === 0 && <p className="py-10 text-center text-sm text-ink-muted">Say hello. She accepted your request, so she’d like to hear from you.</p>}
         {msgs?.map((m, i) => {
           const mine = m.sender_id === me; const prev = msgs[i - 1];
           const newGroup = !prev || prev.sender_id !== m.sender_id || +new Date(m.created_at) - +new Date(prev.created_at) > 5 * 60_000;
@@ -190,7 +190,7 @@ export function Conversation() {
       </ConfirmSheet>
       <ConfirmSheet open={dlg === 'delete'} onClose={() => setDlg(null)} title="Delete this conversation?" confirmLabel="Delete" danger
         onConfirm={async () => { await api.deleteConversation(id); toast('Conversation deleted'); nav('/inbox'); }}>
-        It disappears from your inbox and your copy of the history is cleared. The other person keeps hers. If she writes again, the conversation will reappear (without the old messages) — block her if you don’t want that.
+        It disappears from your inbox and your copy of the history is cleared. The other person keeps hers. If she writes again, the conversation will reappear without the old messages. Block her if you don’t want that.
       </ConfirmSheet>
     </div>
   );

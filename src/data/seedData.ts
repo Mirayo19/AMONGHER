@@ -49,7 +49,7 @@ export const SEED_COLLECTIONS: { slug: string; title: string; description: strin
   { slug: 'things-i-wish-i-knew-before-motherhood', title: 'Things I Wish I Knew Before Motherhood', description: 'Lessons, honest advice and community insight on pregnancy, birth and the first years.', cat: 'motherhood', sort: 1 },
   { slug: 'moving-abroad', title: "Moving Abroad: Lessons From Women Who've Done It", description: 'Practical knowledge on visas, loneliness, money, housing and building a life somewhere new.', cat: 'lifestyle', sort: 2 },
   { slug: 'your-first-year-in-business', title: 'Your First Year in Business', description: 'What women learned launching, pricing, hiring and surviving the early months.', cat: 'career', sort: 3 },
-  { slug: 'money-earlier-than-later', title: 'Money Lessons, Earlier Than Later', description: 'Saving, debt, negotiating and independence — shared plainly.', cat: 'finance', sort: 4 },
+  { slug: 'money-earlier-than-later', title: 'Money Lessons, Earlier Than Later', description: 'Saving, debt, negotiating and independence, shared plainly.', cat: 'finance', sort: 4 },
   { slug: 'walking-into-university', title: 'Walking Into University', description: "Study habits, funding and finding your people, from women who've been there.", cat: 'education', sort: 5 },
   { slug: 'understanding-your-health', title: 'Understanding Your Health', description: "Advocating for yourself in appointments, and what experience can (and can't) tell you.", cat: 'womens-health', sort: 6 },
   { slug: 'staying-safe-staying-sure', title: 'Staying Safe, Staying Sure', description: 'Experience-based awareness on scams, harassment and trusting your instincts.', cat: 'safety', sort: 7 },

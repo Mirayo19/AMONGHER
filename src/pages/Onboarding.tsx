@@ -43,7 +43,7 @@ export default function Onboarding() {
 
       {step === 0 && (
         <div className="mt-3 animate-rise space-y-6">
-          <div><h1 className="text-3xl font-semibold">Hello, @{me?.username}</h1><p className="mt-2 text-ink-muted">Pick an avatar. You can add a short bio and location if you like — both are optional, and neither needs to be real.</p></div>
+          <div><h1 className="text-3xl font-semibold">Hello, @{me?.username}</h1><p className="mt-2 text-ink-muted">Pick an avatar. You can add a short bio and location if you like. Both are optional, and neither needs to be real.</p></div>
           <AvatarPicker motif={motif} tone={tone} onChange={(m, t) => { setMotif(m); setTone(t); }} />
           <Field label="Bio (optional)" htmlFor="bio" hint={<Counter value={bio.length} max={280} />}><Textarea id="bio" maxLength={280} value={bio} onChange={(e) => setBio(e.target.value)} className="min-h-[88px]" placeholder="A line or two about what you’re navigating, or what you could help with." /></Field>
           <Field label="Location (optional)" htmlFor="loc" hint="A city or country is plenty. Leave blank if you prefer."><Input id="loc" maxLength={60} value={loc} onChange={(e) => setLoc(e.target.value)} placeholder="e.g. Lisbon" /></Field>
@@ -51,7 +51,7 @@ export default function Onboarding() {
       )}
       {step === 1 && (
         <div className="mt-3 animate-rise space-y-5">
-          <div><h1 className="text-3xl font-semibold">What would you like to learn about?</h1><p className="mt-2 text-ink-muted">Choose a few topics to start with. This is only used to personalise suggestions — you can change it any time.</p></div>
+          <div><h1 className="text-3xl font-semibold">What would you like to learn about?</h1><p className="mt-2 text-ink-muted">Choose a few topics to start with. This is only used to personalise suggestions. You can change it any time.</p></div>
           <div className="grid grid-cols-2 gap-3">
             {categories.map((c) => {
               const on = interests.includes(c.slug);
@@ -75,7 +75,7 @@ export default function Onboarding() {
             <Switch checked={dm === 'everyone'} onChange={(v) => setDm(v ? 'everyone' : 'nobody')} label="Let members send me message requests" description="You always choose whether to accept. You can switch this off at any time." />
           </div>
           <Notice tone="info" title="What to expect">
-            Posting anonymously hides your username from other members. Our moderators can still see the account behind a post if it’s reported — so everyone stays safe. Your email is never shown to anyone.
+            Posting anonymously hides your username from other members. Our moderators can still see the account behind a post if it’s reported, so everyone stays safe. Your email is never shown to anyone.
           </Notice>
         </div>
       )}

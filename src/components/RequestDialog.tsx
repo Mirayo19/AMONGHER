@@ -20,12 +20,12 @@ export default function RequestDialog({ open, onClose, recipient, contextPostId,
     <Sheet open={open} onClose={close} title={sent ? 'Request sent' : `Message @${recipient.username}`}
       footer={sent ? <Button onClick={close}>Done</Button> : <><Button variant="quiet" onClick={close}>Cancel</Button><Button loading={busy} disabled={intro.trim().length < 5} onClick={send}>Send request</Button></>}>
       {sent ? (
-        <p className="text-[15px] leading-relaxed text-ink-soft">She’ll see your note and can accept or decline — she’s never obliged to. If she accepts, your private conversation opens in your Inbox. You won’t be told if she declines more than “not accepted”.</p>
+        <p className="text-[15px] leading-relaxed text-ink-soft">She’ll see your note and can accept or decline, and she’s never obliged to. If she accepts, your private conversation opens in your Inbox. You won’t be told if she declines more than “not accepted”.</p>
       ) : (
         <div className="space-y-4">
-          <p className="text-sm leading-relaxed text-ink-muted">Write a short, kind introduction. She only sees your username, your avatar and this note — never your email.</p>
+          <p className="text-sm leading-relaxed text-ink-muted">Write a short, kind introduction. She only sees your username, your avatar and this note, never your email.</p>
           <div>
-            <Textarea value={intro} onChange={(e) => setIntro(e.target.value)} maxLength={500} placeholder={prompt ?? 'Hi — I read what you shared and I’d love to ask you a little about it…'} className="min-h-[120px]" aria-label="Introduction" />
+            <Textarea value={intro} onChange={(e) => setIntro(e.target.value)} maxLength={500} placeholder={prompt ?? 'Hi, I read what you shared and I’d love to ask you a little about it…'} className="min-h-[120px]" aria-label="Introduction" />
             <div className="mt-1 text-right"><Counter value={intro.length} max={500} /></div>
           </div>
           <Notice tone="info">Please don’t share contact details, your location or anything identifying in your first note.</Notice>

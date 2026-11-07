@@ -40,7 +40,7 @@ export default function Share() {
 
 const COPY: Record<PostKind, { title: string; sub: string; titlePh: string; bodyLabel: string; bodyPh: string; cta: string }> = {
   experience: { title: 'Share an experience', sub: 'Honest and specific helps most. What happened, what you did, what you’d tell her.', titlePh: 'In one line: what happened?', bodyLabel: 'Your story', bodyPh: 'Take your time. What did you learn, and what would you tell someone facing the same thing?', cta: 'Share experience' },
-  question: { title: 'Ask the community', sub: 'No question is too small. Women who’ve been there will answer — and you can mark the answers that help.', titlePh: 'What would you like to ask?', bodyLabel: 'Add some detail', bodyPh: 'Context helps people answer well: your situation, what you’ve tried, what worries you.', cta: 'Post question' },
+  question: { title: 'Ask the community', sub: 'No question is too small. Women who’ve been there will answer, and you can mark the answers that help.', titlePh: 'What would you like to ask?', bodyLabel: 'Add some detail', bodyPh: 'Context helps people answer well: your situation, what you’ve tried, what worries you.', cta: 'Post question' },
   wish: { title: 'I wish I knew…', sub: 'The lesson, the warning, the thing nobody told you.', titlePh: 'The one thing I wish I’d known…', bodyLabel: 'Why, and what you’d do differently', bodyPh: 'What happened, how it would have changed things, what you’d tell your younger self.', cta: 'Share what I learned' },
 };
 
@@ -70,7 +70,7 @@ export function Composer({ kind }: { kind: PostKind }) {
     setBusy(true); setErr(null);
     try {
       const id = await api.createPost({ kind, category_id: categoryId, title: title.trim(), body: body.trim(), wish_topic: kind === 'wish' ? topic : null, situation_id: situationId || null, is_anonymous: anon, allow_curation: kind !== 'question' && curation });
-      toast('Posted — thank you for sharing'); nav(`/post/${id}`, { replace: true });
+      toast('Posted, thank you for sharing'); nav(`/post/${id}`, { replace: true });
     } catch (e) { setErr(errorMessage(e)); } finally { setBusy(false); }
   };
 

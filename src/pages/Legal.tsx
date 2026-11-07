@@ -16,7 +16,7 @@ function Shell({ title, updated, children }: { title: string; updated: string; c
       <BrandLink />
       <h1 className="mt-8 text-4xl font-semibold">{title}</h1>
       <p className="mt-1 text-sm text-ink-muted">Draft · {updated}</p>
-      <Notice tone="danger" className="mt-5" title="Draft — not yet legal advice or an adopted policy">
+      <Notice tone="danger" className="mt-5" title="Draft: not yet legal advice or an adopted policy">
         This text describes what the software actually does today. Before launch it must be reviewed by a qualified lawyer for your jurisdiction (for example UK/EU GDPR, CCPA, online-safety law), and the highlighted <Fill>placeholders</Fill> completed.
       </Notice>
       {children}
@@ -46,7 +46,7 @@ export function Privacy() {
         <li><strong>Your email:</strong> only you, and people with access to our database console for support or legal reasons. It is never shown in the app, including to moderators and administrators.</li>
         <li><strong>Anonymous posts and comments:</strong> other members see no username or avatar. Moderators can see which account wrote an anonymous item so they can act on abuse reports. Administrators and moderators cannot see anonymous authorship in any other circumstance.</li>
         <li><strong>Private messages:</strong> only you and the other person. They are protected by access controls but are <strong>not end-to-end encrypted</strong>. Moderators see a conversation or message only if a participant reports it, and then only the messages the reporter attaches.</li>
-        <li><strong>Discoverability:</strong> if you opt in to “Find someone who understands”, members see your username, avatar, short note and (if public) bio — not your email or location.</li>
+        <li><strong>Discoverability:</strong> if you opt in to “Find someone who understands”, members see your username, avatar, short note and (if public) bio, not your email or location.</li>
         <li><strong>Verification files:</strong> stored in a private bucket; only you and administrators can open them.</li>
       </L>
 
@@ -104,7 +104,7 @@ export function Terms() {
       <P>You can delete your account at any time in Settings. We may suspend or end accounts that break these terms.</P>
 
       <H>Our responsibility</H>
-      <P><Fill>Limitation of liability, warranty disclaimer, governing law and jurisdiction — to be written by counsel.</Fill></P>
+      <P><Fill>Limitation of liability, warranty disclaimer, governing law and jurisdiction, to be written by counsel.</Fill></P>
 
       <H>Changes and contact</H>
       <P>If we change these terms in a way that matters, we will tell members in the app before it takes effect. Contact: <Fill>contact email</Fill>.</P>

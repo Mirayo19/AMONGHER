@@ -34,7 +34,7 @@ export default function Explore() {
       {searching ? (
         <section aria-live="polite">
           <p className="mb-3 text-sm text-ink-muted">Results for “{term}”</p>
-          <PostList query={{ search: term }} empty={<EmptyState icon={<Search size={22} />} title="Nothing found">Try fewer or different words — or ask it as a question and let the community answer.</EmptyState>} />
+          <PostList query={{ search: term }} empty={<EmptyState icon={<Search size={22} />} title="Nothing found">Try fewer or different words, or ask it as a question and let the community answer.</EmptyState>} />
         </section>
       ) : (<>
         <div className="grid grid-cols-2 gap-3">
@@ -55,7 +55,7 @@ export default function Explore() {
           </Link>
           <Link to="/wish" className="card group flex gap-4 p-5 transition hover:shadow-lift">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brass-500 text-white"><Quote size={22} /></span>
-            <div><h3 className="text-lg font-semibold">I wish I knew…</h3><p className="mt-1 text-sm leading-relaxed text-ink-muted">Lessons women wish they’d learned earlier — about marriage, money, health and more.</p></div>
+            <div><h3 className="text-lg font-semibold">I wish I knew…</h3><p className="mt-1 text-sm leading-relaxed text-ink-muted">Lessons women wish they’d learned earlier, about marriage, money, health and more.</p></div>
           </Link>
         </div>
 

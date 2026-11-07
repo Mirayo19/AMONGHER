@@ -65,7 +65,7 @@ export default function Library() {
 
   return (
     <div>
-      <PageHeader eyebrow="Lived knowledge" title="Library" subtitle="Experiences, lessons and advice from women — gathered into collections by our editors, after review." />
+      <PageHeader eyebrow="Lived knowledge" title="Library" subtitle="Experiences, lessons and advice from women, gathered into collections by our editors after review." />
       <div className="relative mb-4">
         <Search size={19} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-faint" />
         <input value={q} type="search" aria-label="Search the library" placeholder="Search lessons, advice, experiences…" className="input pl-11" onChange={(e) => { setQ(e.target.value); setTermD.current(e.target.value); }} />
@@ -135,7 +135,7 @@ export function CollectionPage() {
       <Link to="/library" className="mb-3 inline-flex items-center gap-1 text-sm font-semibold text-ink-muted hover:text-plum-800"><ChevronLeft size={16} />Library</Link>
       <header className="t-bg mb-5 rounded-3xl p-6">
         <BookOpen className="t-fg" size={26} />
-        {c.status === 'draft' && <span className="ml-3 rounded bg-clay-500 px-2 py-0.5 text-[11px] font-bold text-white">DRAFT — staff only</span>}
+        {c.status === 'draft' && <span className="ml-3 rounded bg-clay-500 px-2 py-0.5 text-[11px] font-bold text-white">DRAFT (staff only)</span>}
         <h1 className="mt-4 text-3xl font-semibold leading-tight">{c.title}</h1>
         <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">{c.description}</p>
         <div className="mt-4 flex items-center justify-between gap-3">

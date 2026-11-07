@@ -25,7 +25,7 @@ export function PreviewBanner() {
   return (
     <div className="bg-plum-950 px-4 py-2 text-center text-xs font-medium text-plum-100">
       <FlaskConical size={13} className="mr-1.5 inline -translate-y-px text-brass-300" />
-      Preview mode — Supabase isn’t connected, so everything is stored only in this browser and no emails are sent.{' '}
+      Preview mode. Supabase isn’t connected, so everything is stored only in this browser and no emails are sent.{' '}
       <Link to="/setup" className="font-bold text-brass-300 underline underline-offset-2">Connect Supabase</Link>
     </div>
   );
@@ -91,7 +91,7 @@ export default function AppShell() {
             <Menu trigger={<Avatar motif={me.avatar_motif} tone={me.avatar_tone} size={30} />}>
               {(close) => (<>
                 <div className="border-b border-ivory-300 px-4 pb-2.5 pt-2">
-                  <p className="text-xs text-ink-muted">Signed in as</p>
+                  <p className="text-xs text-ink-muted">Logged in as</p>
                   <p className="truncate text-sm font-bold text-plum-900">@{me.username}</p>
                 </div>
                 <MenuItem to="/me" onClick={close} icon={<User size={17} />}>My profile</MenuItem>
