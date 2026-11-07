@@ -109,7 +109,10 @@ async function main() {
   await page.fill('textarea[aria-label^="Add a kind"]', 'Great tip about the silence.');
   await page.getByRole('button', { name: 'Post comment' }).click(); await sees('Great tip about the silence', 'comment posted'); await shot('post-detail');
   await page.getByRole('button', { name: 'Request chat' }).click();
-  await page.fill('textarea[aria-label=Introduction]', 'Hi Alice, your salary story really helped me.');
+  // Type key by key, like a person: a dialog that steals focus on each keystroke would drop most letters.
+  const intro = page.locator('textarea[aria-label=Introduction]'); await intro.click();
+  await intro.pressSequentially('Hi Alice, your salary story really helped me.', { delay: 15 });
+  (await intro.inputValue()) === 'Hi Alice, your salary story really helped me.' ? ok('typing in a dialog keeps focus (all letters arrive)') : bad(`dialog lost focus while typing: "${await intro.inputValue()}"`);
   await page.getByRole('button', { name: 'Send request' }).click(); await sees('Request sent', 'message request sent'); await page.getByRole('button', { name: 'Done' }).click();
   await page.locator('article button[aria-haspopup=menu]').first().click(); await page.getByRole('menuitem', { name: 'Report post' }).click();
   await page.getByText('Spam or selling').click(); await page.getByRole('button', { name: 'Send report' }).click(); await sees('Thank you', 'post report submitted'); await page.getByRole('button', { name: 'Done' }).click();

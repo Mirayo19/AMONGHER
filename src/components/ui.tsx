@@ -221,15 +221,20 @@ export function Notice({ tone = 'info', title, children, className }: { tone?: N
 /* ---------------------------------------------------------------- Sheet / modal */
 export function Sheet({ open, onClose, title, children, footer }: { open: boolean; onClose: () => void; title: string; children: ReactNode; footer?: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
+  // Callers pass a fresh onClose on every render. Keep it in a ref so the effect below runs only when the
+  // dialog opens or closes. If it depended on onClose, every keystroke would re-run it and steal focus
+  // from the text box (you could only type one letter at a time).
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   useEffect(() => {
     if (!open) return;
     const prev = document.activeElement as HTMLElement | null;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCloseRef.current(); };
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
     ref.current?.focus();
     return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; prev?.focus?.(); };
-  }, [open, onClose]);
+  }, [open]);
   if (!open) return null;
   // Portal to <body>: the page's entrance animation creates a stacking context that would trap a fixed dialog beneath the nav.
   return createPortal(
