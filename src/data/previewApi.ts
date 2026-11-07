@@ -345,7 +345,7 @@ export function createPreviewApi(): Api {
       if (!p || p.author_id !== u.id) throw FORBIDDEN();
       if (p.status === 'hidden' || p.status === 'removed') throw new AppError('post_locked', 'This post is locked by a moderator.');
       const t = title.trim(); const b = body.trim();
-      if (t.length < 4 || t.length > 140 || b.length < 10 || b.length > 5000) throw new AppError('invalid_length', 'Check the title and body length.');
+      if (t.length < 1 || t.length > 140 || b.length < 1 || b.length > 5000) throw new AppError('invalid_length', 'Add a title and some text.');
       if (t === p.title && b === p.body) return;
       const cat = db.categories.find((c) => c.id === p.category_id);
       p.title = t; p.body = b; p.sensitive = !!cat?.sensitive || looksSensitive(`${t} ${b}`); p.reviewed_at = null;

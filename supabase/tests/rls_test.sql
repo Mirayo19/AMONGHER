@@ -431,7 +431,7 @@ select t.fails($$select public.edit_post(t.u('P5'), 'Hijacked title here', 'Some
 select t.login('alice');
 select public.edit_post(t.u('P5'), 'Asking for a raise (updated)', 'I prepared three examples of my impact. Looking back, a stalked-out calendar of wins helped most.');
 select t.ok((select title = 'Asking for a raise (updated)' and sensitive from public.post_feed where id = t.u('P5')), 'editing re-runs sensitivity detection');
-select t.fails($$select public.edit_post(t.u('P5'), 'ab', 'too short title should be rejected by the table checks')$$, 'check', 'edit still enforces length limits');
+select t.fails($$select public.edit_post(t.u('P5'), '   ', 'a blank title must still be rejected')$$, 'check', 'edit still refuses a blank title');
 select t.login('bea');
 select t.ok((select count(*) from public.library_entries where id = t.u('P5')) = 0, 'editing a featured post removes it from the Library until re-reviewed');
 select t.login('alice');
@@ -441,6 +441,20 @@ select t.login('mod');
 select t.ok((select count(*) from public.staff_review_queue() q where q = t.u('P5')) = 1, 'edited sensitive post appears in the staff review queue');
 select t.login('bea');
 select t.fails($$select * from public.staff_review_queue()$$, 'forbidden', 'members cannot read the review queue');
+
+-- no minimum length: a short lesson is still a lesson
+select t.exec_id($$insert into public.posts (author_id, kind, category_id, title, body)
+  values (auth.uid(), 'experience', (select id from public.categories where slug='lifestyle'), 'Hi', 'Ok') returning id$$, 'P_SHORT');
+select t.ok((select title = 'Hi' and body = 'Ok' from public.post_feed where id = t.u('P_SHORT')), 'a 2-letter title and 2-letter body can be posted');
+select t.fails($$insert into public.posts (author_id, kind, category_id, title, body)
+  values (auth.uid(), 'experience', (select id from public.categories where slug='lifestyle'), '   ', 'text')$$, 'check', 'a blank (spaces-only) title is still refused');
+select t.fails($$insert into public.posts (author_id, kind, category_id, title, body)
+  values (auth.uid(), 'experience', (select id from public.categories where slug='lifestyle'), 'Title', '   ')$$, 'check', 'a blank (spaces-only) body is still refused');
+select t.fails($$insert into public.posts (author_id, kind, category_id, title, body)
+  values (auth.uid(), 'experience', (select id from public.categories where slug='lifestyle'), repeat('x', 141), 'text')$$, 'check', 'maximum title length still enforced');
+select t.ok(public.send_message_request(t.u('mod'), 'hi') is not null, 'a short message-request note (2 letters) is accepted');
+insert into public.verification_requests (user_id, statement) values (auth.uid(), 'ok');
+select t.ok(true, 'a short verification statement is accepted (staff can still reject it)');
 
 -- report one message
 select t.login('alice');

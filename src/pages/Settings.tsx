@@ -142,7 +142,7 @@ function Verification({ v, reload }: { v: Awaited<ReturnType<typeof api.getMyVer
             <input id="vf" type="file" accept="image/jpeg,image/png,application/pdf" onChange={(e) => { const f = e.target.files?.[0] ?? null; setFile(f && f.size > 5 * 1024 * 1024 ? (toast('File must be under 5 MB', 'error'), null) : f); }} className="block w-full text-sm text-ink-muted file:mr-3 file:rounded-lg file:border-0 file:bg-plum-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-plum-800" />
           </Field>
           <p className="hint flex items-start gap-1.5"><ShieldCheck size={14} className="mt-0.5 shrink-0" />A person reads every request. This badge is not an identity or age check.</p>
-          <Button loading={busy} disabled={statement.trim().length < 20} onClick={submit}>Submit for review</Button>
+          <Button loading={busy} disabled={statement.trim().length < 1} onClick={submit}>Submit for review</Button>
         </div>)}
     </Section>
   );

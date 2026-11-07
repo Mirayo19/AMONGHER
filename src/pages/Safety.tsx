@@ -80,8 +80,8 @@ export function Suspended() {
         <h2 className="text-xl font-semibold">Appeal this decision</h2>
         {pending ? <Notice tone="info" className="mt-3" title="Your appeal is with an administrator">We’ll update this page when it’s been reviewed.</Notice> : (
           <form onSubmit={submit} className="mt-3 space-y-3">
-            <Field label="What would you like us to know?" htmlFor="ap" hint={<Counter value={msg.length} max={1500} />}><Textarea id="ap" required minLength={10} maxLength={1500} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Explain what happened, or why you believe this was a mistake." /></Field>
-            <Button type="submit" loading={busy} disabled={msg.trim().length < 10}>Submit appeal</Button>
+            <Field label="What would you like us to know?" htmlFor="ap" hint={<Counter value={msg.length} max={1500} />}><Textarea id="ap" required maxLength={1500} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Explain what happened, or why you believe this was a mistake." /></Field>
+            <Button type="submit" loading={busy} disabled={msg.trim().length < 1}>Submit appeal</Button>
           </form>)}
         {!!appeals.data?.length && <ul className="mt-6 space-y-3">{appeals.data.map((a) => (
           <li key={a.id} className="card p-4 text-sm"><div className="flex justify-between"><span className="font-semibold capitalize">{a.status === 'pending' ? 'Under review' : a.status === 'granted' ? 'Granted' : 'Not upheld'}</span><span className="text-ink-muted">{fullDate(a.created_at)}</span></div><p className="mt-1 text-ink-muted">{a.message}</p>{a.admin_note && <p className="mt-2 rounded-lg bg-plum-50 p-2.5"><strong>Reviewer:</strong> {a.admin_note}</p>}</li>))}</ul>}

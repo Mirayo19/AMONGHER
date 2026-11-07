@@ -18,7 +18,7 @@ export default function RequestDialog({ open, onClose, recipient, contextPostId,
   };
   return (
     <Sheet open={open} onClose={close} title={sent ? 'Request sent' : `Message @${recipient.username}`}
-      footer={sent ? <Button onClick={close}>Done</Button> : <><Button variant="quiet" onClick={close}>Cancel</Button><Button loading={busy} disabled={intro.trim().length < 5} onClick={send}>Send request</Button></>}>
+      footer={sent ? <Button onClick={close}>Done</Button> : <><Button variant="quiet" onClick={close}>Cancel</Button><Button loading={busy} disabled={intro.trim().length < 1} onClick={send}>Send request</Button></>}>
       {sent ? (
         <p className="text-[15px] leading-relaxed text-ink-soft">She’ll see your note and can accept or decline, and she’s never obliged to. If she accepts, your private conversation opens in your Inbox. You won’t be told if she declines more than “not accepted”.</p>
       ) : (

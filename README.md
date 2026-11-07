@@ -18,7 +18,7 @@ With no Supabase variables the app starts in **clearly-labelled preview mode** (
 ## Connect Supabase (what is required for real accounts and persistence)
 
 1. Create a project at supabase.com. Note the project URL and the **anon** key.
-2. Run `supabase/migrations/0001…0004` in order (SQL editor or `supabase db push`), then `supabase/seed.sql` (taxonomy + empty collection shells; **creates no users or posts**).
+2. Run `supabase/migrations/0001…0006` in order (SQL editor or `supabase db push`), then `supabase/seed.sql` (taxonomy + empty collection shells; **creates no users or posts**).
 3. Authentication → Email: enable, keep **Confirm email** on; set Site URL and add `/login` and `/reset` to Redirect URLs; use your own SMTP in production.
 4. `cp .env.example .env.local` and fill `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`. **Never** put the `service_role` key in any `VITE_*` variable.
 5. Sign up in the app, then promote the first admin in the SQL editor (impossible from inside the app by design):
@@ -75,7 +75,7 @@ npm test             # typecheck + both
 ## Project layout
 
 ```
-supabase/migrations   schema → logic (triggers/RPCs) → security (views/RLS/grants) → storage → additions (edit post, message reports, data export)
+supabase/migrations   schema → logic (triggers/RPCs) → security (views/RLS/grants) → storage → additions (edit post, message reports, data export) → relaxed minimum lengths
 e2e/run.mjs           repeatable browser test-suite
 supabase/seed.sql     configuration only
 supabase/tests        Postgres-backed security test-suite

@@ -54,7 +54,7 @@ export function StatusBanner({ post }: { post: Post }) {
 function EditPostSheet({ post, onClose, onSaved }: { post: Post; onClose: () => void; onSaved: (title: string, body: string) => void }) {
   const toast = useToast();
   const [title, setTitle] = useState(post.title); const [body, setBody] = useState(post.body); const [busy, setBusy] = useState(false);
-  const valid = title.trim().length >= 4 && body.trim().length >= 10;
+  const valid = title.trim().length >= 1 && body.trim().length >= 1;
   const save = async () => {
     setBusy(true);
     try { await api.editPost(post.id, title, body); onSaved(title.trim(), body.trim()); toast('Post updated'); onClose(); }

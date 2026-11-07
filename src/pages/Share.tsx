@@ -65,7 +65,7 @@ export function Composer({ kind }: { kind: PostKind }) {
   useEffect(() => { if (sensitive && !anonTouched) setAnon(true); }, [sensitive, anonTouched]);
   const relevantSituations = useMemo(() => situations.filter((s) => !categoryId || s.category_id === categoryId), [situations, categoryId]);
 
-  const valid = categoryId && title.trim().length >= 4 && body.trim().length >= 10 && (kind !== 'wish' || topic);
+  const valid = categoryId && title.trim().length >= 1 && body.trim().length >= 1 && (kind !== 'wish' || topic);
   const submit = async () => {
     setBusy(true); setErr(null);
     try {

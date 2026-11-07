@@ -26,7 +26,9 @@ export default function Setup() {
           <Code>{`0001_schema.sql      tables
 0002_logic.sql       triggers, RPCs, helpers
 0003_security.sql    views, Row Level Security, grants
-0004_storage.sql     private evidence bucket`}</Code>
+0004_storage.sql     private evidence bucket
+0005_additions.sql   edit post, message reports, data export
+0006_relax_minimum_lengths.sql   no minimum post length`}</Code>
           <p className="text-sm text-ink-muted">Then run <code>supabase/seed.sql</code>, which adds categories, situations and empty collection shells only. <strong>It creates no members or posts.</strong></p></li>
         <li><h2 className="text-lg font-semibold">3 · Configure authentication</h2>
           <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-ink-muted">

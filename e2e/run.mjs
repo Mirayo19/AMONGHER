@@ -91,6 +91,8 @@ async function main() {
   await page.goto(`${BASE}/share/wish`); await page.getByRole('button', { name: 'About money' }).click(); await page.getByRole('button', { name: 'Finance' }).click();
   await page.fill('#t', 'Start the pension earlier'); await page.fill('#b', 'Compound interest rewards the patient. I wish I had started at 22, not 31.');
   await page.getByRole('button', { name: 'Share what I learned' }).click(); await page.waitForURL('**/post/**'); ok('wish posted');
+  await page.goto(`${BASE}/share/experience`); await page.getByRole('button', { name: 'Lifestyle' }).click(); await page.fill('#t', 'Hi'); await page.fill('#b', 'Ok');
+  await page.getByRole('button', { name: 'Share experience' }).click(); await page.waitForURL('**/post/**'); ok('a very short post (2-letter title and body) can be shared');
   await page.goto(`${BASE}/share/experience`); await page.getByRole('button', { name: 'Lifestyle' }).click();
   await page.fill('#b', 'Some days I think about self-harm and I do not know who to tell.');
   await sees('If you might act on thoughts of harming yourself', 'crisis wording shows the helpline notice');
@@ -137,7 +139,7 @@ async function main() {
   await page.goto(`${BASE}/settings`); await page.getByRole('button', { name: 'Download my data' }).scrollIntoViewIfNeeded(); await shot('settings-your-data');
   const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Download my data' }).click()]);
   const data = JSON.parse(readFileSync(await dl.path(), 'utf8'));
-  if (data.account?.email === 'alice@example.test' && data.posts?.length === 3 && JSON.stringify(data).indexOf('bea@example.test') === -1) ok('data export contains her own data (3 posts) and nobody else’s email'); else bad(`data export looks wrong: ${JSON.stringify(data).slice(0, 120)}`);
+  if (data.account?.email === 'alice@example.test' && data.posts?.length === 4 && JSON.stringify(data).indexOf('bea@example.test') === -1) ok('data export contains her own data (4 posts) and nobody else’s email'); else bad(`data export looks wrong: ${JSON.stringify(data).slice(0, 120)}`);
 
   section('Admin: dashboard, review queue, wish themes');
   await page.goto(`${BASE}/admin`); await sees('Admin dashboard', 'admin dashboard opens for admin'); await sees('Open reports', 'stats shown'); await shot('admin');
